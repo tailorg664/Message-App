@@ -7,7 +7,7 @@ import ChatInfo from "./Layouts/ChatInfo/ChatInfo.jsx";
 function App() {
   return (
     <div className="container">
-      <div className="user_info bg-red-400">
+      <div className="user_info bg-white">
         <UserInfo />
       </div>
       <div className="user_contacts bg-blue-500">
