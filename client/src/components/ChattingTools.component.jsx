@@ -1,7 +1,6 @@
 import React from 'react'
 
 function ChattingTools() {
-      const [message, setMessage] = React.useState(null);
       const [inputMessage, setInputMessage] = React.useState(null);
   return (
     <div className="bg-green-200 p-4 flex items-center">

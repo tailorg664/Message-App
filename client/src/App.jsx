@@ -1,35 +1,26 @@
-import './App.css'
-import React from 'react'
-import UserChat from './components/UserChat.component'
-import Search from './components/Search.component'
-import InteractorComponent from './components/InteractorComponent.component'
-import InteractionEnvironment from './components/InteractionEnvironment.component'
-import ChattingTools from './components/ChattingTools.component'
+import "./App.css";
+import React from "react";
+import UserInfo from "./Layouts/UserInfo/UserInfo.jsx";
+import UserContacts from "./Layouts/UserContacts/UserContacts.jsx";
+import ChatBox from "./Layouts/ChatBox/ChatBox.jsx";
+import ChatInfo from "./Layouts/ChatInfo/ChatInfo.jsx";
 function App() {
-const [message, setMessage] = React.useState(null);
-const [inputMessage, setInputMessage] = React.useState(null);
   return (
-    <div className="container bg-gray-200 m-3 ">
-      <div className="semi-container issue01 -> there-is-no-border-radius flex h-screen border-red-600 border-2 rounded-xl">
-        {/* chat section ..> Search Bar*/}
-        <div className="chat-section w-1/4 bg-purple-400 border-r">
-          {/* Search Bar */}
-          <Search/>
-          {/* User Chat */}
-          <UserChat/>
-        </div>
-        {/* Interaction Section */}
-        <div className="flex-1 flex flex-col">\
-          
-          <InteractorComponent/>
-
-          <InteractionEnvironment/>
-
-          <ChattingTools/>
-        </div>
+    <div className="container">
+      <div className="user_info bg-red-400">
+        <UserInfo />
+      </div>
+      <div className="user_contacts bg-blue-500">
+        <UserContacts />
+      </div>
+      <div className="chat_box bg-green-400">
+        <ChatBox />
+      </div>
+      <div className="chat_info bg-orange-400">
+        <ChatInfo />
       </div>
     </div>
   );
 }
 
-export default App
+export default App;
