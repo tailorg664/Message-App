@@ -3,7 +3,6 @@ import React from "react";
 import UserInfo from "./Layouts/UserInfo/UserInfo.jsx";
 import UserContacts from "./Layouts/UserContacts/UserContacts.jsx";
 import ChatBox from "./Layouts/ChatBox/ChatBox.jsx";
-import ChatInfo from "./Layouts/ChatInfo/ChatInfo.jsx";
 function App() {
   return (
     <div className="container">
@@ -15,9 +14,6 @@ function App() {
       </div>
       <div className="chat_box bg-green-400">
         <ChatBox />
-      </div>
-      <div className="chat_info bg-orange-400">
-        <ChatInfo />
       </div>
     </div>
   );
