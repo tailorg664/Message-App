@@ -8,7 +8,7 @@ function Contact() {
         <h3 className="name font-semibold ">Name of User</h3>
         <p className="message_glimpse text-sm">Message...</p>
       </div>
-      <h4 className="time-status pl-16 ">00:00</h4>
+      <h4 className="time-status pl-28 ">00:00</h4>
     </div>
   );
 }
