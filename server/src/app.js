@@ -7,8 +7,9 @@ connectDB()
   .catch(() => console.log("Error occured while connecting to database"));
 //port connection
 app.use(express.json());
+//route connection
 const userRouter = require("./routes/UserRoutes");
-app.use("/api/v1/signup", userRouter);
+app.use("/api/v1", userRouter);
 app.listen(3000, () => {
   console.log("Server is running on http://localhost:3000");
 });
