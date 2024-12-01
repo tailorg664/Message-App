@@ -61,6 +61,8 @@ exports.loginUser = asyncHandler(async (req, res) => {
   const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
+  console.log(loggedInUser);
+  
   const options = {
     httponly: true,
     secure: true,
@@ -82,11 +84,14 @@ exports.loginUser = asyncHandler(async (req, res) => {
     );
 });
 exports.logoutUser = asyncHandler(async (req, res) => {
+  console.log(req.user);
   if (!req.user || !req.user._id) {
     return res
       .status(400)
       .json(new ApiResponse(400, {}, "User ID is missing from the request"));
   }
+  
+  
   const userId = req.user._id.toString().replace(/^String\("(.*)"\)$/, "$1");
   await User.findByIdAndUpdate(
     userId,
