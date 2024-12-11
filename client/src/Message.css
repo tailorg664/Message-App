@@ -1,0 +1,20 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+.container{
+      display: flex;
+      height: 100vh;
+      width: 100%;
+}
+.user_info{
+      
+      width: 70px;
+}
+.user_contacts{
+      width: 450px;
+}
+.chat_box{
+      width: 100%;
+}

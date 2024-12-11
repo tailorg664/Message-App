@@ -9,7 +9,11 @@ connectDB()
 app.use(express.json());
 //route connection
 const userRouter = require("./routes/UserRoutes");
+const messageRouter = require("./routes/MessageRoutes");
 app.use("/api/v1", userRouter);
+app.use("/api/v1/messages", messageRouter);
+
+//hosting
 app.listen(3000, () => {
   console.log("Server is running on http://localhost:3000");
 });

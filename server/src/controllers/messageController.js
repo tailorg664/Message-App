@@ -3,8 +3,8 @@ const asyncHandler = require("../utils/asyncHandler");
 const ApiResponse = require("../utils/ApiResponse");
 const ApiError = require("../utils/ApiError");
 exports.sendMessage = asyncHandler(async (req, res) => {
+  const { senderId } = req.user.id;
   const {
-    senderId,
     receiverId,
     content,
     attachmentUrl,
