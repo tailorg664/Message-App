@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import attach from "../../assets/attach.png";
-import emoji from "../../assets/emoji.png";
-import microphone from "../../assets/microphone.png";
-import {emoji_click} from "../../blocks/Tools/emoji.jsx";
+import { useState } from "react";
+import attach from "/assets/buttons/attach.png";
+import emoji from "/assets/buttons/emoji.png";
+import microphone from "/assets/buttons/microphone.png";
 import "./ChatBox.css";
 function ChatBox() {
   // State for managing input message
@@ -42,7 +41,7 @@ function ChatBox() {
 
       {/* Input Area */}
       <div className="input-area">
-        <div className="emoji pl-2 pr-1" onClick={()=>emoji_click()}>
+        <div className="emoji pl-2 pr-1" >
           <img src={emoji} alt="" />
         </div>
         <div className="attach pr-1">

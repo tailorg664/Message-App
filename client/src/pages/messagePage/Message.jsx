@@ -1,3 +1,4 @@
+
 import "./Message.css";
 import UserInfo from "./Layouts/UserInfo/UserInfo.jsx";
 import UserContacts from "./Layouts/UserContacts/UserContacts.jsx";
@@ -15,7 +16,7 @@ function Message() {
         <ChatBox />
       </div>
     </div>
-  )
+  );
 }
 
-export default Message
+export default Message;

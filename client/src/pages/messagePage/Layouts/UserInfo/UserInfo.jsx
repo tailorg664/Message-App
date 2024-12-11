@@ -1,7 +1,7 @@
 import "./UserInfo.css";
-import chat_image1 from "../../assets/buttons/messageIcon.png";
-import chat_image2 from "../../assets/buttons/phoneIcon.png";
-import chat_image3 from "../../assets/buttons/settingIcon.png";
+import chat_image1 from "/assets/buttons/messageIcon.png";
+import chat_image2 from "/assets/buttons/phoneIcon.png";
+import chat_image3 from "/assets/buttons/settingIcon.png";
 function UserInfo() {
   return (
     <div className="userInfoHeader">

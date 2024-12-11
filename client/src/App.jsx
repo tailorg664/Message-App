@@ -1,6 +1,6 @@
 import "./App.css";
-import LandingPage from "./LandingPage.jsx";
-import Message from "./Message.jsx";
+import LandingPage from "./pages/landingPage/LandingPage.jsx";
+import Message from "./pages/messagePage/Message.jsx";
 import { Routes, Route, Navigate } from 'react-router-dom';
 function App() {
   return (
