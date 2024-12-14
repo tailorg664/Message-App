@@ -1,0 +1,9 @@
+*{
+      margin: 0;
+      padding: 0;
+}
+.navbtn{
+      border:1px solid #000;
+      border-radius: 2px;
+
+}

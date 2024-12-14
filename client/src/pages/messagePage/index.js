@@ -1,2 +1,1 @@
-import {Message} from './Message.jsx';
-export default Message;
+export { default } from "./Message";

@@ -1,2 +1,1 @@
-import {LandingPage} from './LandingPage.jsx';
-export default LandingPage;
+export { default } from './LandingPage';
