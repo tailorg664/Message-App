@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
   },
   lastSeen: { type: Date },
   refreshToken: { type: String },
+  accessToken : {type: String},
 },{timestamps:true});
 
 // Model creation

@@ -1,6 +1,8 @@
 import "./LoginPage.css";
-import { useState } from "react";
+import { useState} from "react";
+import {useNavigate} from "react-router-dom";
 function LoginPage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     identifier: "",
     password: "",
@@ -31,6 +33,7 @@ function LoginPage() {
       );
       const result = await response.json();
       if (result.ok) {
+        navigate("/message")
         setMessage(result.message);
       } else {
         setMessage(result.error);

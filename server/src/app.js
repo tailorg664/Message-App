@@ -18,7 +18,9 @@ app.use(
 //route connection
 const userRouter = require("./routes/UserRoutes");
 const messageRouter = require("./routes/MessageRoutes");
+const contactRouter = require("./routes/ContactRoutes");
 app.use("/api/v1", userRouter);
+app.use("/api/v1", contactRouter);
 app.use("/api/v1/messages", messageRouter);
 
 //hosting
