@@ -39,7 +39,7 @@ exports.createUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, newUser, "User registered Successfully"));
 });
 exports.loginUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password } = req.query;
   //check if the username or email is provided
   if (!email && !username) {
     throw new ApiError(400, "Username or email is required for loging user!");
