@@ -11,6 +11,7 @@ const createRefreshAndAccessToken = async (userId) => {
     const refreshToken = user.generateRefreshToken(userId);
     const accessToken = user.generateAccessToken(userId);
     user.refreshToken = refreshToken;
+    user.accessToken = accessToken;
     await user.save({ validateBeforeSave: false });
     return { refreshToken, accessToken };
   } catch (error) {
@@ -19,13 +20,14 @@ const createRefreshAndAccessToken = async (userId) => {
 };
 // Controllers
 exports.createUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.query;
+  const { fullname,username, email, password } = req.body;
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return res.status(400).json({ message: "User already exists" });
   }
 
   const newUser = new User({
+    fullname,
     username,
     email,
     password,
@@ -39,7 +41,7 @@ exports.createUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, newUser, "User registered Successfully"));
 });
 exports.loginUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.query;
+  const { username, email, password } = req.body;
   //check if the username or email is provided
   if (!email && !username) {
     throw new ApiError(400, "Username or email is required for loging user!");

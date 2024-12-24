@@ -1,22 +1,31 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  status: {
-    type: String,
-    enum: ["online", "offline"], 
-    default: "offline", 
+const userSchema = new mongoose.Schema(
+  {
+    fullname: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["online", "offline"],
+      default: "offline",
+    },
+    contacts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Contact", // Reference to the Contact model
+      },
+    ],
+    lastSeen: { type: Date },
+    refreshToken: { type: String },
+    accessToken: { type: String },
   },
-  lastSeen: { type: Date },
-  refreshToken: { type: String },
-  accessToken : {type: String},
-},{timestamps:true});
+  { timestamps: true }
+);
 
 // Model creation
-
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
