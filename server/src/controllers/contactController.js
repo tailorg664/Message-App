@@ -42,3 +42,6 @@ exports.getContacts = asyncHandler(async (req, res) => {
   }
   res.json(new ApiResponse(200, "Contacts retrieved", userContacts.contacts));
 });
+exports.updateContact = asyncHandler(async (req,res) =>{
+  
+})
