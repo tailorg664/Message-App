@@ -3,7 +3,12 @@ const mongoose = require("mongoose");
 const messageSchema = new mongoose.Schema({
   sender: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Contact", // References the Contact model
+    ref: "Contact", // References the User model
+    required: true,
+  },
+  reciever : {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Contact", // References the User model
     required: true,
   },
   content: {

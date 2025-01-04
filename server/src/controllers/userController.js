@@ -20,7 +20,7 @@ const createRefreshAndAccessToken = async (userId) => {
 };
 // Controllers
 exports.createUser = asyncHandler(async (req, res) => {
-  const { fullname,username, email, password } = req.body;
+  const { fullname, email, password } = req.body;
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return res.status(400).json({ message: "User already exists" });
@@ -28,7 +28,6 @@ exports.createUser = asyncHandler(async (req, res) => {
 
   const newUser = new User({
     fullname,
-    username,
     email,
     password,
   });
@@ -41,12 +40,12 @@ exports.createUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, newUser, "User registered Successfully"));
 });
 exports.loginUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
+  const { email, password } = req.body;
   //check if the username or email is provided
-  if (!email && !username) {
-    throw new ApiError(400, "Username or email is required for loging user!");
+  if (!email) {
+    throw new ApiError(400, "Email is required for loging user!");
   }
-  const user = await User.findOne({ $or: [{ email }, { username }] });
+  const user = await User.findOne({email});
   //check if the user exists
   if (!user) {
     throw new ApiError(404, "User does not exist");
@@ -54,7 +53,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
   // Compare input password with hashed password in the database
   const isPasswordValid = await user.isPasswordCorrect(password);
   console.log(isPasswordValid);
-  
+
   if (!isPasswordValid) throw new ApiError(401, "Invalid user credentials");
   //token generation by calling the function createRefreshAndAccessToken
   const { refreshToken, accessToken } = await createRefreshAndAccessToken(
@@ -64,7 +63,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
   console.log(loggedInUser);
-  
+
   const options = {
     httponly: true,
     secure: true,
@@ -92,8 +91,7 @@ exports.logoutUser = asyncHandler(async (req, res) => {
       .status(400)
       .json(new ApiResponse(400, {}, "User ID is missing from the request"));
   }
-  
-  
+
   const userId = req.user._id.toString().replace(/^String\("(.*)"\)$/, "$1");
   await User.findByIdAndUpdate(
     userId,

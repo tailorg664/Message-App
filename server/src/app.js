@@ -6,6 +6,10 @@ const connectDB = require("./db/index");
 connectDB()
   .then(() => console.log("Database connected"))
   .catch(() => console.log("Error occured while connecting to database"));
+//socket initialization
+const { initializeSocket } = require("./utils/socket");
+const server = http.createServer(app);
+initializeSocket(server);
 //port connection
 app.use(express.json());
 app.use(
@@ -19,9 +23,9 @@ app.use(
 const userRouter = require("./routes/UserRoutes");
 const messageRouter = require("./routes/MessageRoutes");
 const contactRouter = require("./routes/ContactRoutes");
-app.use("/api/v1", userRouter);
-app.use("/api/v1", contactRouter);
-app.use("/api/v1/messages", messageRouter);
+app.use("/api/auth", userRouter);
+app.use("/api/contacts", contactRouter);
+app.use("/api/messages", messageRouter);
 
 //hosting
 app.listen(3000, () => {

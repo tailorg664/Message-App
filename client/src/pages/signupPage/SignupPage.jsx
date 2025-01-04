@@ -4,7 +4,6 @@ function SignupPage() {
   //handling the form data
   const [formData, setFormData] = useState({
     fullname: "",
-    username: "",
     email: "",
     password: "",
   });
@@ -21,7 +20,7 @@ function SignupPage() {
   const handleSubmit = async (e) => {
     e.preventDefault(); //to prevent the default behaviour of the form
     const queryParams = new URLSearchParams({
-      username: formData.username,
+      fullname: formData.fullname,
       email: formData.email,
       password: formData.password,
     }).toString();
@@ -49,23 +48,13 @@ function SignupPage() {
     <div className="signup bg-teal-600">
       <form className="bg-teal-300" action="" onSubmit={handleSubmit}>
         <h1 className="pl-28 font-bold text-3xl">Signup Page</h1>
-        <label htmlFor="fullname">Fullname</label>
+        <label htmlFor="fullname">Full Name</label>
         <input
           className="border-2 border-black"
           type="fullname"
           id="fullname"
           name="fullname"
           value={formData.fullname}
-          onChange={handleChange}
-          required
-        />
-        <label htmlFor="username">Username</label>
-        <input
-          className="border-2 border-black"
-          type="username"
-          id="username"
-          name="username"
-          value={formData.username}
           onChange={handleChange}
           required
         />
@@ -89,7 +78,7 @@ function SignupPage() {
           onChange={handleChange}
           required
         />
-        <button type="submit">Signup</button>
+        <button type="submit">SignUp</button>
       </form>
     </div>
   );
