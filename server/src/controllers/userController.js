@@ -114,3 +114,11 @@ exports.logoutUser = asyncHandler(async (req, res) => {
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "user logged out"));
 });
+exports.checkAuth = asyncHandler(async (req, res) => {
+  try {
+    res.status(200).json(new ApiResponse(200, req.user, "User is authenticated"));
+  } catch (error) {
+    console.log("Error in checkAuth", error.message);
+    throw new ApiError(401, "User is not authenticated");
+  }
+})
