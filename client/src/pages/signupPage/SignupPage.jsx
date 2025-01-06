@@ -2,6 +2,10 @@ import { useAuthStore } from "../../store/useAuthStore";
 // import "./SignupPage.css";
 import { useState } from "react";
 import {Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User} from "lucide-react"
+import signup_animation from "";
+
+
+
 function SignupPage() {
   const {signup, isSigningUp} = useAuthStore()
   const validateForm = () => {}
@@ -151,6 +155,8 @@ function SignupPage() {
           </form>
         </div>
       </div>
+      {/* right side */}
+      <div>Join our community</div>
     </div>
   );
 }

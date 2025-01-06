@@ -40,7 +40,7 @@ function ChatBox() {
       </div>
 
       {/* Input Area */}
-      <div className="input-area">
+      <div className="inputArea">
         <div className="emoji pl-2 pr-1" >
           <img src={emoji} alt="" />
         </div>

@@ -47,7 +47,7 @@
 }
 
 /* Text Input */
-.input {
+.inputArea {
   flex: 1;
   padding: 15px;
   background-color: rgb(83, 93, 109);
