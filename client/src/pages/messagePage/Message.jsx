@@ -1,5 +1,5 @@
 
-import "./Message.css";
+// import "./Message.css";
 import UserInfo from "./Layouts/UserInfo/UserInfo.jsx";
 import UserContacts from "./Layouts/UserContacts/UserContacts.jsx";
 import ChatBox from "./Layouts/ChatBox/ChatBox.jsx";

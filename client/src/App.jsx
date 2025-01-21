@@ -4,14 +4,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
-function Navbar() {
-  return (
-    <div className="w-full h-12 bg-gray-800 text-white flex items-center justify-between px-4">
-      <div className="icon">icon</div>
-      <div className="">settings</div>
-    </div>
-  );
-}
+import Navbar from "./components/Navbar";
+import {Toaster} from 'react-hot-toast';
+
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
   useEffect(() => {
@@ -44,6 +39,7 @@ function App() {
           element={!authUser ? <LoginPage /> : <Navigate to={"/message"} />}
         />
       </Routes>
+      <Toaster/>
     </div>
   );
 }

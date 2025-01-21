@@ -1,14 +1,31 @@
 import { useAuthStore } from "../../store/useAuthStore";
 // import "./SignupPage.css";
 import { useState } from "react";
-import {Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User} from "lucide-react"
-import signup_animation from "";
-
-
+import { toast } from "react-hot-toast";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  MessageSquare,
+  User,
+} from "lucide-react";
+import AuthImagePattern from "../../components/AuthImagePattern";
 
 function SignupPage() {
-  const {signup, isSigningUp} = useAuthStore()
-  const validateForm = () => {}
+  const { signup, isSigningUp } = useAuthStore();
+  const validateForm = () => {
+    if (!formData.fullname.trim()) return toast.error("Fullname is required");
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!/\S+@\S+\.\S+/.test(formData.email))
+      return toast.error("Invalid email format.");
+    if (!formData.password) return toast.error("Password is required");
+    if (formData.password.length < 6)
+      return toast.error("Password must be at least 6 characters long");
+
+    return true;
+  };
   //handling the form data
   const [formData, setFormData] = useState({
     fullname: "",
@@ -27,25 +44,14 @@ function SignupPage() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault(); //to prevent the default behaviour of the form
-    const queryParams = new URLSearchParams({
-      fullname: formData.fullname,
-      email: formData.email,
-      password: formData.password,
-    }).toString();
-    try {
-      console.log(formData);
-      //fetching the data
-      const response = await fetch(
-        `http://localhost:3000/api/v1/signup?${queryParams}`,
-        {
-          method: "GET",
-        }
-      );
-      const result = await response.json();
-      
-    } catch (error) {
-      console.error("Error:", error);
-      
+
+    //validate the form
+    const success = validateForm();
+    if (success === true) {
+      signup(formData);
+    }
+    else{
+      toast.error("An error occurred, please try again later");
     }
   };
   return (
@@ -77,12 +83,11 @@ function SignupPage() {
                 </div>
                 <input
                   type="text"
+                  name="fullname"
                   className={`input input-bordered w-full pl-10`}
                   placeholder="John Doe"
                   value={formData.fullname}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullname: e.target.value })
-                  }
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -97,12 +102,11 @@ function SignupPage() {
                 </div>
                 <input
                   type="email"
+                  name="email"
                   className={`input input-bordered w-full pl-10`}
                   placeholder="you@example.com"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -117,12 +121,11 @@ function SignupPage() {
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
                   className={`input input-bordered w-full pl-10`}
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
+                  onChange={handleChange}
                 />
                 <button
                   type="button"
@@ -156,7 +159,10 @@ function SignupPage() {
         </div>
       </div>
       {/* right side */}
-      <div>Join our community</div>
+      <AuthImagePattern
+        title="Join our community"
+        subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
+      />
     </div>
   );
 }

@@ -6,13 +6,15 @@ const ApiError = require("../utils/ApiError");
 const verifyJwt = asyncHandler(async (req, res, next) => {
   try {
     const token =
-      req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer ", "");
+      req.cookies?.jwt || req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       throw new ApiError(401, "Unauthorized, please login");
     }
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET);
+    if (!decodedToken) {
+      throw new ApiError(401, "Token does not matches. Internal server error");
+    }
     const user = await User.findById(decodedToken?._id);
     if (!user) {
       throw new ApiError(401, "Unauthorized, please login");
@@ -23,4 +25,4 @@ const verifyJwt = asyncHandler(async (req, res, next) => {
     throw new ApiError(401, error?.message || "Invalid access token");
   }
 });
-module.exports = verifyJwt
+module.exports = verifyJwt;
