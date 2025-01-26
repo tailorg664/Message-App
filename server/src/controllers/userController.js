@@ -60,13 +60,13 @@ exports.loginUser = asyncHandler(async (req, res) => {
   //token generation by calling the function createRefreshAndAccessToken
   const token = await createToken(user._id);
   const loggedInUser = await User.findById(user._id).select(
-    "-password -refreshToken"
+    "-password -Token"
   );
   console.log(loggedInUser);
 
   const options = {
     httponly: true,
-    secure: true,
+    secure: false,
   };
   return res
     .status(200)
