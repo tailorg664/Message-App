@@ -1,18 +1,12 @@
-
-// import "./Message.css";
-import UserInfo from "./Layouts/UserInfo/UserInfo.jsx";
-import UserContacts from "./Layouts/UserContacts/UserContacts.jsx";
-import ChatBox from "./Layouts/ChatBox/ChatBox.jsx";
+import UserContacts from "./Layouts/UserContacts.jsx";
+import ChatBox from "./Layouts/ChatBox.jsx";
 function Message() {
   return (
-    <div className="container">
-      <div className="user_info bg-white">
-        <UserInfo />
-      </div>
-      <div className="user_contacts bg-blue-500">
+    <div className="message flex flex-row w-auto h-screen">
+      <div className="user_contacts w-1/3 lg:w-1/5 bg-blue-500">
         <UserContacts />
       </div>
-      <div className="chat_box bg-green-400">
+      <div className="chat_box w-2/3 lg:w-4/5 bg-green-400">
         <ChatBox />
       </div>
     </div>

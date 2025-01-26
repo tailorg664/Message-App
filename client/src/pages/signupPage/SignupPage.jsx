@@ -1,5 +1,4 @@
 import { useAuthStore } from "../../store/useAuthStore";
-// import "./SignupPage.css";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import attach from "/assets/buttons/attach.png";
 import emoji from "/assets/buttons/emoji.png";
 import microphone from "/assets/buttons/microphone.png";
-import "./ChatBox.css";
+
 function ChatBox() {
   // State for managing input message
   const [message, setMessage] = useState("");
@@ -40,23 +40,28 @@ function ChatBox() {
       </div>
 
       {/* Input Area */}
-      <div className="inputArea">
-        <div className="emoji pl-2 pr-1" >
-          <img src={emoji} alt="" />
-        </div>
-        <div className="attach pr-1">
-          <img src={attach} alt="" />
-        </div>
-        <input
-          type="text"
-          placeholder="Type a message..."
-          className="input"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-        />
-        <div className="microphone pr-1">
-          <img src={microphone} alt="" />
+      <div className="inputArea absolute bottom-0  w-[1228.8px]">
+        <div className="inputBox flex flex-row justify-evenly w-full">
+          <div className="emoji pl-2 pr-1">
+            <img src={emoji} alt="" />
+          </div>
+          <div className="attach pr-1">
+            <img src={attach} alt="" />
+          </div>
+          <div className="inputBox w-[1100px]">
+            <input
+              type="text"
+              placeholder="Type a message..."
+              className="input w-full bg-blue-600"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+            />
+          </div>
+
+          <div className="microphone">
+            <img src={microphone} alt="" />
+          </div>
         </div>
       </div>
     </div>
