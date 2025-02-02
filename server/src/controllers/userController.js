@@ -2,6 +2,7 @@ const User = require("../model/UserSchema");
 const asyncHandler = require("../utils/asyncHandler");
 const ApiResponse = require("../utils/ApiResponse");
 const ApiError = require("../utils/ApiError");
+const cloudinary = require("../utils/cloudinary.js");
 // Function to create refresh and access token
 const createToken = async (userId) => {
   try {
@@ -43,7 +44,7 @@ exports.createUser = asyncHandler(async (req, res) => {
 });
 exports.loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  //check if the username or email is provided
+  //check if the email is provided
   if (!email) {
     throw new ApiError(400, "Email is required for loging user!");
   }
@@ -114,3 +115,19 @@ exports.checkAuth = asyncHandler(async (req, res) => {
     throw new ApiError(401, "User is not authenticated");
   }
 });
+exports.updateProfile = asyncHandler(async (req, res) => {
+  try{
+    const {avatar} = req.body;
+    const userId = req.user._id
+    if(!avatar){
+      throw new ApiError(400, "Please provide a profile picture")
+    }
+    const uploadResponse = await cloudinary.uploader.upload(avatar)
+    const updatedUser = await User.findByIdAndUpdate(userId, {avatar: uploadResponse.secure_url}, {new: true})
+
+    res.status(200).json(new ApiResponse(200, updatedUser, "Profile picture updated successfully"))
+  }catch(error){
+    console.log("Error in updateProfile", error.message)
+    res.status(400).json(new ApiResponse(400, {}, "Internal server error."))
+  }
+})
