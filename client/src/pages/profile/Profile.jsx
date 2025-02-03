@@ -9,10 +9,10 @@ function Profile() {
             if(!file) return;
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = () => {
+            reader.onload = async () => {
                   const base64Image = reader.result;
                   setSelectedImg(base64Image);
-                  updateProfile({profilePic: base64Image});
+                  await updateProfile({avatar: base64Image});
             }
       }
 

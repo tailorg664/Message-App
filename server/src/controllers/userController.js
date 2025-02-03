@@ -60,9 +60,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
   if (!isPasswordValid) throw new ApiError(401, "Invalid user credentials");
   //token generation by calling the function createRefreshAndAccessToken
   const token = await createToken(user._id);
-  const loggedInUser = await User.findById(user._id).select(
-    "-password -Token"
-  );
+  const loggedInUser = await User.findById(user._id).select("-password -Token");
   console.log(loggedInUser);
 
   const options = {
@@ -92,8 +90,8 @@ exports.logoutUser = asyncHandler(async (req, res) => {
   }
 
   const userId = req.user._id.toString().replace(/^String\("(.*)"\)$/, "$1");
-  const user = await User.findByIdAndUpdate(userId, { token: undefined});
-  if(!user){
+  const user = await User.findByIdAndUpdate(userId, { token: undefined });
+  if (!user) {
     throw new ApiError(400, "User not found");
   }
   const options = {
@@ -116,18 +114,30 @@ exports.checkAuth = asyncHandler(async (req, res) => {
   }
 });
 exports.updateProfile = asyncHandler(async (req, res) => {
-  try{
-    const {avatar} = req.body;
-    const userId = req.user._id
-    if(!avatar){
-      throw new ApiError(400, "Please provide a profile picture")
+  try {
+    const { avatar } = req.body;
+    const userId = req.user._id;
+    if (!avatar) {
+      throw new ApiError(400, "Please provide a profile picture");
     }
-    const uploadResponse = await cloudinary.uploader.upload(avatar)
-    const updatedUser = await User.findByIdAndUpdate(userId, {avatar: uploadResponse.secure_url}, {new: true})
+    const uploadResponse = await cloudinary.uploader.upload(avatar);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { avatar: uploadResponse.secure_url },
+      { new: true }
+    );
 
-    res.status(200).json(new ApiResponse(200, updatedUser, "Profile picture updated successfully"))
-  }catch(error){
-    console.log("Error in updateProfile", error.message)
-    res.status(400).json(new ApiResponse(400, {}, "Internal server error."))
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          updatedUser,
+          "Profile picture updated successfully"
+        )
+      );
+  } catch (error) {
+    console.log("Error in updateProfile", error.message);
+    res.status(400).json(new ApiResponse(400, {}, "Internal server error."));
   }
-})
+});
