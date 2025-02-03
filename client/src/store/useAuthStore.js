@@ -10,7 +10,7 @@ export const useAuthStore = create((set) => ({
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
-      console.log(res.data);
+      console.log("This is the response"+res);
       
       set({ authUser: res.data });
     } catch (error) {
@@ -24,7 +24,7 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.post("/auth/signup", data);
       toast.success("Account created successfully");
-      set({ authUser: res.data });
+      set({ authUser: res.data.data });
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -36,7 +36,7 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.post("/auth/login", data);
       toast.success("Logged in successfully");
-      set({ authUser: res.data });
+      set({ authUser: res.data.data });
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -55,9 +55,7 @@ export const useAuthStore = create((set) => ({
   updateProfile: async (data) => {
     set({ updatingProfile: true });
     try {
-      const res = await axiosInstance.put("/auth/update-profile", data);
-      if(res === null) console.log("res is null");
-      
+      const res = await axiosInstance.put("/auth/update-profile", data);      
       set({ authUser: res.data });
       toast.success("Profile updated successfully");
     } catch (error) {

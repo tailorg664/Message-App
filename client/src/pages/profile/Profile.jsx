@@ -1,4 +1,5 @@
 import React from 'react'
+import avatar_image from "/avatar.png"
 import { useAuthStore } from '../../store/useAuthStore'
 import { Camera, Mail, User } from 'lucide-react'
 function Profile() {
@@ -9,6 +10,8 @@ function Profile() {
             if(!file) return;
             const reader = new FileReader();
             reader.readAsDataURL(file);
+            console.log(reader);
+            
             reader.onload = async () => {
                   const base64Image = reader.result;
                   setSelectedImg(base64Image);
@@ -30,7 +33,7 @@ function Profile() {
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
-                src={selectedImg || authUser.profilePic || "/avatar.png"}
+                src={selectedImg || authUser.avatar || avatar_image}
                 alt="Profile"
                 className="size-32 rounded-full object-cover border-4 "
               />
@@ -71,7 +74,7 @@ function Profile() {
                 Full Name
               </div>
               <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
-                {authUser?.fullName}
+                {authUser?.fullname}
               </p>
             </div>
 

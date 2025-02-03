@@ -19,6 +19,7 @@ app.use(cookieParser());
 //cors connection
 const corsOptions = {
   origin: "http://localhost:5173", // Allow your frontend's origin
+  methods: "GET,POST,PUT,DELETE",
   credentials: true, // Allow cookies and credentials
 };
 app.use(cors(corsOptions));

@@ -105,9 +105,7 @@ exports.logoutUser = asyncHandler(async (req, res) => {
 });
 exports.checkAuth = asyncHandler(async (req, res) => {
   try {
-    res
-      .status(200)
-      .json(new ApiResponse(200, req.user, "User is authenticated"));
+    res.status(200).json(req.user);
   } catch (error) {
     console.log("Error in checkAuth", error.message);
     throw new ApiError(401, "User is not authenticated");
@@ -127,15 +125,7 @@ exports.updateProfile = asyncHandler(async (req, res) => {
       { new: true }
     );
 
-    res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          updatedUser,
-          "Profile picture updated successfully"
-        )
-      );
+    res.status(200).json(updatedUser);
   } catch (error) {
     console.log("Error in updateProfile", error.message);
     res.status(400).json(new ApiResponse(400, {}, "Internal server error."));
