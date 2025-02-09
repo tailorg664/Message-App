@@ -1,13 +1,19 @@
 import UserContacts from "./Layouts/UserContacts.jsx";
 import ChatBox from "./Layouts/ChatBox.jsx";
+import {useChatStore} from "../../store/useChatStore";
+import NoChatSelected from "./Layouts/NoChatSelected.jsx";
 function Message() {
+  const {selectedUser} = useChatStore()
   return (
-    <div className="message flex flex-row w-auto h-screen">
-      <div className="user_contacts w-1/3 lg:w-1/5 bg-blue-500">
-        <UserContacts />
-      </div>
-      <div className="chat_box w-2/3 lg:w-4/5 bg-green-400">
-        <ChatBox />
+    <div className="h-screen bg-base-200">
+      <div className="flex items-center justify-center pt-20 px-4">
+        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
+          <div className="flex h-full rounded-lg overflow-hidden">
+            <UserContacts />
+
+            {!selectedUser ? <NoChatSelected /> : <ChatBox />}
+          </div>
+        </div>
       </div>
     </div>
   );

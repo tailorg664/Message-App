@@ -1,18 +1,14 @@
 import { useState } from "react";
-import attach from "/assets/buttons/attach.png";
-import emoji from "/assets/buttons/emoji.png";
-import microphone from "/assets/buttons/microphone.png";
-
+import { useChatStore } from "../../../store/useChatStore";
 function ChatBox() {
-  // State for managing input message
-  const [message, setMessage] = useState("");
-
-  // State for storing messages
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Hello!", sender: "user" },
-    { id: 2, text: "Hi there!", sender: "other" },
-  ]);
-
+  const {
+    messages,
+    getMessages,
+    isMessagesLoading,
+    selectedUser,
+    subscribeToMessages,
+    unsubscribeFromMessages,
+  } = useChatStore();
   const sendMessage = () => {
     if (message.trim() !== "") {
       // Append the new message to the messages array

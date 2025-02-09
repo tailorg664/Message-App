@@ -70,7 +70,7 @@ function LoginPage() {
                   type="text"
                   className={`input input-bordered w-full pl-10`}
                   name="email"
-                  placeholder="John Doe"
+                  placeholder="you@email.com"
                   value={formData.email}
                   onChange={handleChange}
                   required
