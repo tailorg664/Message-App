@@ -2,22 +2,21 @@ const Message = require("../model/MessageSchema");
 const asyncHandler = require("../utils/asyncHandler");
 const ApiResponse = require("../utils/ApiResponse");
 const ApiError = require("../utils/ApiError");
-const sendNotification = require("../utils/Notifications");
+
 exports.sendMessage = asyncHandler(async (req, res) => {
   const sender = req.user.id;
-  const { reciever, content } = req.body;
-  if (!sender || !reciever) {
+  const { id: userToChat, content } = req.body;
+  if (!sender || !userToChat) {
     throw new ApiError(404, "sender or reciever doesnot exists.");
   }
 
   // Create a new message
   const message = new Message({
     sender,
-    reciever,
+    userToChat,
     content,
   });
   const savedMessage = await message.save();
-  sendNotification(reciever, savedMessage);
   res.status(201).json(new ApiResponse(201, "Message sent", message));
 });
 exports.deleteMessage = asyncHandler(async (req, res) => {

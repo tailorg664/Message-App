@@ -1,65 +1,56 @@
-import { useState } from "react";
+import React from "react";
 import { useChatStore } from "../../../store/useChatStore";
+import ChatHeader from "../skeletons/ChatHeader";
+import MessageInput from "../skeletons/MessageInput";
+import MessageSkeleton from "../skeletons/MessageSkeleton";
+import { formatMessageTime } from "../../../lib/utils.js";
+import { useAuthStore } from "../../../store/useAuthStore";
 function ChatBox() {
-  const {
-    messages,
-    getMessages,
-    isMessagesLoading,
-    selectedUser,
-    subscribeToMessages,
-    unsubscribeFromMessages,
-  } = useChatStore();
-  const sendMessage = () => {
-    if (message.trim() !== "") {
-      // Append the new message to the messages array
-      setMessages([
-        ...messages,
-        { id: messages.length + 1, text: message, sender: "user" },
-      ]);
-      setMessage(""); // Clear the input field
-    }
-  };
-  return (
-    <div className="chat-box">
-      {/* Messages Display Area */}
-      <div className="messages">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`message ${
-              msg.sender === "user" ? "user-message" : "other-message"
-            }`}
-          >
-            {msg.text}
-          </div>
-        ))}
-      </div>
-
-      {/* Input Area */}
-      <div className="inputArea absolute bottom-0  w-[1228.8px]">
-        <div className="inputBox flex flex-row justify-evenly w-full">
-          <div className="emoji pl-2 pr-1">
-            <img src={emoji} alt="" />
-          </div>
-          <div className="attach pr-1">
-            <img src={attach} alt="" />
-          </div>
-          <div className="inputBox w-[1100px]">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              className="input w-full bg-blue-600"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-            />
-          </div>
-
-          <div className="microphone">
-            <img src={microphone} alt="" />
-          </div>
+  const { authUser } = useAuthStore();
+  const { messages, getMessages, isMessagesLoading, selectedUser } =
+    useChatStore();
+  React.useEffect(() => {
+    getMessages(selectedUser.id);
+  }, [getMessages, selectedUser.id]);
+  if (isMessagesLoading) {
+    return (
+      <div className="flex-1 flex">
+        <ChatHeader />
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((message) => {
+            <div
+              key={message.id}
+              className={`chat ${
+                message.senderId === authUser.id ? "chat-end" : "chat-start"
+              }`}
+            >
+              <div className="chat-header mb-1">
+                <time className="text-xs opacity-50 ml-1">
+                  {formatMessageTime(message.createdAt)}
+                </time>
+              </div>
+              <div className="chat-bubble flex">
+                {message.image && (
+                  <img
+                    src={message.image}
+                    alt="attachment"
+                    className="sm: max-w-[200px] rounded-md mb-2"
+                  />
+                )}
+                {message.text && <p>{message.text}</p>}
+              </div>
+            </div>;
+          })}
         </div>
+        <MessageInput />
       </div>
+    );
+  }
+  return (
+    <div className="flex-1 flex">
+      <ChatHeader />
+      <MessageSkeleton />
+      <MessageInput />
     </div>
   );
 }
