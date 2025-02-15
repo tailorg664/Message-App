@@ -6,14 +6,16 @@ const messageSchema = new mongoose.Schema({
     ref: "Contact", // References the User model
     required: true,
   },
-  reciever : {
+  reciever: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Contact", // References the User model
     required: true,
   },
   content: {
     type: String, // The actual message text
-    required: true,
+  },
+  image: {
+    type: String,
   },
   timestamp: {
     type: Date,

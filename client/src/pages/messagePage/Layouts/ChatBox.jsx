@@ -7,11 +7,15 @@ import { formatMessageTime } from "../../../lib/utils.js";
 import { useAuthStore } from "../../../store/useAuthStore";
 function ChatBox() {
   const { authUser } = useAuthStore();
-  const { messages, getMessages, isMessagesLoading, selectedUser } =
+  const { messages, getMessages, isMessagesLoading, selectedUser,subscribeToMessages, unsubscribeFromMessages } =
     useChatStore();
   React.useEffect(() => {
     getMessages(selectedUser.id);
-  }, [getMessages, selectedUser.id]);
+
+    subscribeToMessages();
+
+    return () => unsubscribeFromMessages();
+  }, [getMessages, selectedUser.id,subscribeToMessages,unsubscribeFromMessages]);
   if (isMessagesLoading) {
     return (
       <div className="flex-1 flex">

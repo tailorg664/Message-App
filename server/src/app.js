@@ -1,5 +1,5 @@
 const express = require("express");
-const app = express();
+import {app,server} from "./utils/socket";
 const cors = require("cors");
 const connectDB = require("./db/index");
 const http = require("http");
@@ -8,10 +8,6 @@ const cookieParser = require("cookie-parser");
 connectDB()
   .then(() => console.log("Database connected"))
   .catch(() => console.log("Error occured while connecting to database"));
-//socket initialization
-const { initializeSocket } = require("./utils/socket");
-const server = http.createServer(app);
-initializeSocket(server);
 //port connection
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -32,6 +28,6 @@ app.use("/api/contacts/", contactRouter);
 app.use("/api/messages/", messageRouter);
 
 //hosting
-app.listen(3000, () => {
+server.listen(3000, () => {
   console.log("Server is running on http://localhost:3000/api");
 });

@@ -1,41 +1,31 @@
-// Import necessary modules
 const { Server } = require("socket.io");
+const express = require("express");
+const http = require("http");
 
-let io; // To hold the Socket.IO instance
+const app = express();
+const server = http.createServer(app);
 
-const initializeSocket = (server) => {
-  io = new Server(server, {
-    cors: {
-      origin: "*", // Replace '*' with your client URL for production
-      methods: ["GET", "POST"],
-    },
-  });
-
-  // Handle connection event
-  io.on("connection", (socket) => {
-    console.log(`User connected: ${socket.id}`);
-
-    // Custom events can be defined here
-    socket.on("joinRoom", (roomId) => {
-      socket.join(roomId);
-      console.log(`User ${socket.id} joined room: ${roomId}`);
-    });
-
-    socket.on("disconnect", () => {
-      console.log(`User disconnected: ${socket.id}`);
-    });
-  });
-
-  return io;
-};
-
-const getSocketInstance = () => {
-  if (!io) {
-    throw new Error(
-      "Socket.IO is not initialized. Please call initializeSocket() first."
-    );
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173"],
+  },
+});
+//used to store online users
+const userSocketMap = {};
+export function getRecieverSocketId(userId){
+  return userSocketMap[userId];
+}
+io.on("connection", (socket) => {
+  console.log("A user connected", socket.id);
+  const userId = socket.handshake.query.userId;
+  if (userId) {
+    userSocketMap[userId] = socket.id;
   }
-  return io;
-};
-
-module.exports = { initializeSocket, getSocketInstance };
+  io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  socket.on("disconnect", () => {
+    console.log("A user disconnected", socket.id);
+    delete userSocketMap[userId];
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  });
+});
+export default { io, app };

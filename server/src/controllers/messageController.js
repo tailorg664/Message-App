@@ -2,22 +2,36 @@ const Message = require("../model/MessageSchema");
 const asyncHandler = require("../utils/asyncHandler");
 const ApiResponse = require("../utils/ApiResponse");
 const ApiError = require("../utils/ApiError");
+const { getRecieverSocketId } = require("../utils/socket");
+import {io} from "../utils/socket";
+const cloudinary = require("../utils/cloudinary");
 
 exports.sendMessage = asyncHandler(async (req, res) => {
   const sender = req.user.id;
-  const { id: userToChat, content } = req.body;
-  if (!sender || !userToChat) {
+  const { image, content } = req.body;
+  const {id: reciever} = req.params;
+  if (!sender || !reciever) {
     throw new ApiError(404, "sender or reciever doesnot exists.");
   }
-
+  let imageURL;
+  if(image){
+    const uploadResponse = await cloudinary.uploader.upload(image)
+    imageURL = uploadResponse.secure_url;
+  }
   // Create a new message
-  const message = new Message({
+  const newMessage = new Message({
     sender,
-    userToChat,
+    reciever,
     content,
+    image: imageURL
   });
-  const savedMessage = await message.save();
-  res.status(201).json(new ApiResponse(201, "Message sent", message));
+  await newMessage.save();
+  //realtime functionality
+  const recieverSocketId = getRecieverSocketId(reciever);
+  if(recieverSocketId){
+    io.to(recieverSocketId).emit("newMessage", newMessage);
+  }
+  res.status(201).json(new ApiResponse(201, "Message sent", newMessage));
 });
 exports.deleteMessage = asyncHandler(async (req, res) => {
   const messageId = req.body;

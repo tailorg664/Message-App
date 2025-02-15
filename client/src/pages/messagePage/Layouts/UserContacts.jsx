@@ -6,6 +6,7 @@ import { Users } from "lucide-react";
 function UserContacts() {
   const {getUsers, users, isUsersLoading, setSelectedUser,selectedUser} = useChatStore()
   const {onlineUsers} = useAuthStore()
+  const filteredUsers = "User is filtered"// to be done later
   React.useEffect(()=>{
     getUsers()
   },[getUsers])
