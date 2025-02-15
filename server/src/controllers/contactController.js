@@ -22,8 +22,9 @@ exports.addContact = asyncHandler(async (req, res) => {
   await contact.save();
   // saving the contact to the user
   const user = await User.findByIdAndUpdate(userId, {
-    $push: { contacts: contact },
-  });
+    $push: { contacts: contact._id },
+  },
+  {new: true});
   if (!user) {
     throw new ApiError(404, "User not found");
   }

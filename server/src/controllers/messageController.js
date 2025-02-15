@@ -2,8 +2,7 @@ const Message = require("../model/MessageSchema");
 const asyncHandler = require("../utils/asyncHandler");
 const ApiResponse = require("../utils/ApiResponse");
 const ApiError = require("../utils/ApiError");
-const { getRecieverSocketId } = require("../utils/socket");
-import {io} from "../utils/socket";
+const { getRecieverSocketId,io } = require("../utils/socket");
 const cloudinary = require("../utils/cloudinary");
 
 exports.sendMessage = asyncHandler(async (req, res) => {

@@ -1,5 +1,5 @@
 const express = require("express");
-import {app,server} from "./utils/socket";
+const {app,server} = require("../src/utils/socket")
 const cors = require("cors");
 const connectDB = require("./db/index");
 const http = require("http");

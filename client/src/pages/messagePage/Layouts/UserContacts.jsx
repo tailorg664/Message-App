@@ -1,15 +1,19 @@
 import React from "react";
-import {useAuthStore} from "../../../store/useAuthStore"
+import { useAuthStore } from "../../../store/useAuthStore";
 import { useChatStore } from "../../../store/useChatStore";
 import { Users } from "lucide-react";
 
 function UserContacts() {
-  const {getUsers, users, isUsersLoading, setSelectedUser,selectedUser} = useChatStore()
-  const {onlineUsers} = useAuthStore()
-  const filteredUsers = "User is filtered"// to be done later
-  React.useEffect(()=>{
-    getUsers()
-  },[getUsers])
+  const { getUsers, users, isUsersLoading, setSelectedUser, selectedUser } =
+    useChatStore();
+  const { onlineUsers } = useAuthStore();
+  const [showOnlineOnly, setShowOnlineOnly] = React.useState(false);
+  const filteredUsers = showOnlineOnly
+    ? users.filter((user) => onlineUsers.includes(user._id))
+    : users;
+  React.useEffect(() => {
+    getUsers();
+  }, [getUsers]);
   return (
     <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
       <div className="border-b border-base-300 w-full p-5">
@@ -17,8 +21,21 @@ function UserContacts() {
           <Users className="size-6" />
           <span className="font-medium hidden lg:block">Contacts</span>
         </div>
-        {/* TODO: Online filter toggle */}
-        
+        {/* online filter optimization */}
+        <div className="mt-3 hidden lg:flex item-center gap-2">
+          <label className="cursor-pointer flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showOnlineOnly}
+              onChange={(e) => setShowOnlineOnly(e.target.checked)}
+              className="checkbox checkbox-sm"
+            />
+            <span className="text-sm ">Show online only.</span>
+          </label>
+          <span className="text-xs text-zinc-500">
+            ({onlineUsers.length - 1} online)
+          </span>
+        </div>
       </div>
 
       <div className="overflow-y-auto w-full py-3">

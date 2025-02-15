@@ -12,7 +12,7 @@ const io = new Server(server, {
 });
 //used to store online users
 const userSocketMap = {};
-export function getRecieverSocketId(userId){
+function getRecieverSocketId(userId){
   return userSocketMap[userId];
 }
 io.on("connection", (socket) => {
@@ -28,4 +28,4 @@ io.on("connection", (socket) => {
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });
-export default { io, app };
+module.exports = { app, server, io, getRecieverSocketId };

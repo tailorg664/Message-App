@@ -9,6 +9,7 @@ function ChatBox() {
   const { authUser } = useAuthStore();
   const { messages, getMessages, isMessagesLoading, selectedUser,subscribeToMessages, unsubscribeFromMessages } =
     useChatStore();
+  const messageEndRef = React.useRef(null);
   React.useEffect(() => {
     getMessages(selectedUser.id);
 
@@ -16,6 +17,11 @@ function ChatBox() {
 
     return () => unsubscribeFromMessages();
   }, [getMessages, selectedUser.id,subscribeToMessages,unsubscribeFromMessages]);
+  React.useEffect(() => {
+    if(messageEndRef.current && messages){
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  },[messages])
   if (isMessagesLoading) {
     return (
       <div className="flex-1 flex">
