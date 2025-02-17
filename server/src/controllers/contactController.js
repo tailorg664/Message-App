@@ -6,27 +6,33 @@ const ApiError = require("../utils/ApiError");
 
 exports.addContact = asyncHandler(async (req, res) => {
   // importing data from the body
-  const { fullname, email } = req.body;
-  if (!fullname || !email) {
-    throw new ApiError(404, "The contact doesnot exist");
-  }
-  const userId = req.user._id;
-  if (!userId) {
+  const {userToInviteId} = req.body;
+  const chatOrganizerId = req.user._id;
+  if (!chatOrganizerId) {
     throw new ApiError(404, "userId not found");
   }
   // creating a new contact
   const contact = new Contact({
-    fullname,
-    email,
+    fullname: userToInviteId.fullname,
+    email: userToInviteId.email,
   });
   await contact.save();
   // saving the contact to the user
-  const user = await User.findByIdAndUpdate(userId, {
-    $push: { contacts: contact._id },
-  },
-  {new: true});
-  if (!user) {
-    throw new ApiError(404, "User not found");
+  const [organizerUpdate, inviteeUpdate] = await Promise.all([
+    Contact.updateOne(
+      { userId: chatOrganizerId },
+      { $addToSet: { contacts: userToInviteId } }, // Prevent duplicates
+      { upsert: true }
+    ),
+    Contact.updateOne(
+      { userId: userToInviteId },
+      { $addToSet: { contacts: chatOrganizerId } },
+      { upsert: true }
+    ),
+  ]);
+
+  if (!organizerUpdate.nModified && !inviteeUpdate.nModified) {
+    throw new ApiError(404, "Failed to add contact");
   }
   res.status(201).json(new ApiResponse(201, "Contact added", contact));
 });
