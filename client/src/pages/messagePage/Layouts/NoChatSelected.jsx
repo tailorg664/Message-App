@@ -2,15 +2,13 @@ import React from "react";
 import { MessageSquare, X } from "lucide-react";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { generateInviteLink } from "../../../lib/invite";
-import { shareViaEmail,shareViaFacebook,shareViaTelegram,shareViaTwitter,shareViaWhatsApp } from "../../../lib/shareLinks";
-//importing icons 
 import toast from "react-hot-toast";
 
 
 function NoChatSelected() {
   const { authUser } = useAuthStore();
   const [showModal, setShowModal] = React.useState(false);
-  const inviteLink = generateInviteLink(authUser.id);
+  const inviteLink = generateInviteLink(authUser?._id);
   const message = `Join me on ChatApp: ${inviteLink}`;
   const shareOptions = [
     {
@@ -53,8 +51,7 @@ function NoChatSelected() {
       toast.error("You need to login to invite someone!");
       return;
     }
-     const inviteLink = generateInviteLink();
-     const shareUrl =shareOptions.find((option) => option.name === platform)
+     const shareUrl =shareOptions.find((option) => option.name === platform).url
      window.open(shareUrl, "_blank");
   };
   return (

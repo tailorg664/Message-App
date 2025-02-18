@@ -6,12 +6,13 @@ import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import Navbar from "./components/Navbar";
 import { Toaster } from "react-hot-toast";
+import InviteHandler from "./components/InviteHandler";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
   useEffect(() => {
     checkAuth();
-  }, [checkAuth,authUser]);
+  }, [checkAuth, authUser]);
   if (isCheckingAuth && !authUser) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -24,6 +25,12 @@ function App() {
     <div>
       <Navbar />
       <Routes>
+        <Route path="/invite/:userId" element={<InviteHandler/>}/>
+        <Route
+          path="/message/:userId"
+          element={authUser ? <Message /> : <Navigate to={"/login"} />}
+        />
+
         <Route
           path="/message"
           element={authUser ? <Message /> : <Navigate to={"/login"} />}

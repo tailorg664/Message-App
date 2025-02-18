@@ -59,5 +59,18 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
   },
+  invitations: async (invitorUserId,invitedUserId)=>{
+    try {
+      const res = await axiosInstance.post(
+        "/contacts/addContact",
+        invitorUserId,
+        invitedUserId
+      );
+      set({ users: [...get().users, res.data.data] });
+    } catch (error) {
+      toast.error(error.message);
+    }
+
+  },
   setSelectedUser: (selectedUser) => set({ selectedUser }),
 }));

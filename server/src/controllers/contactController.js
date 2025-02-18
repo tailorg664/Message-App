@@ -6,8 +6,7 @@ const ApiError = require("../utils/ApiError");
 
 exports.addContact = asyncHandler(async (req, res) => {
   // importing data from the body
-  const {userToInviteId} = req.body;
-  const chatOrganizerId = req.user._id;
+  const { chatOrganizerId, userToInviteId } = req.body;
   if (!chatOrganizerId) {
     throw new ApiError(404, "userId not found");
   }
@@ -41,14 +40,10 @@ exports.getContacts = asyncHandler(async (req, res) => {
   if (!userId) {
     throw new ApiError(404, "invalid user entry");
   }
-  const userContacts = await User.findById(userId)
-    .populate("contacts")
-    .lean();
+  const userContacts = await User.findById(userId).populate("contacts").lean();
   if (!userContacts) {
     throw new ApiError(404, "Contacts not found");
   }
   res.json(new ApiResponse(200, "Contacts retrieved", userContacts.contacts));
 });
-exports.updateContact = asyncHandler(async (req,res) =>{
-  
-})
+exports.updateContact = asyncHandler(async (req, res) => {});
