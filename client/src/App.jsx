@@ -25,7 +25,7 @@ function App() {
     <div>
       <Navbar />
       <Routes>
-        <Route path="/invite/:userId" element={<InviteHandler/>}/>
+        <Route path="/invite/:userId" element={authUser ? <InviteHandler/>: <Navigate to={"/login"}/>}/>
         <Route
           path="/message/:userId"
           element={authUser ? <Message /> : <Navigate to={"/login"} />}

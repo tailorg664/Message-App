@@ -13,7 +13,7 @@ export const useChatStore = create((set, get) => ({
     set({ isUsersLoading: true });
     try {
       const res = await axiosInstance.get("/contacts/displayContacts");
-      set({ users : res.data.message });
+      set({ users: res.data.data });
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -47,9 +47,15 @@ export const useChatStore = create((set, get) => ({
     const { selectedUser } = get();
     if (!selectedUser) return;
     const socket = useAuthStore.getState().socket;
+     if (!socket) {
+       console.error("Socket is null. Ensure it is initialized.");
+       return;
+     }
+
     socket.on("newMessage", (newMessage) => {
       // Check if the message is sent to the selected user
-      const isMessageSentToSelectedUser = newMessage.senderId === selectedUser._id
+      const isMessageSentToSelectedUser =
+        newMessage.senderId === selectedUser._id;
       if (!isMessageSentToSelectedUser) return;
       // Add the new message to the messages array
       set({ messages: [...get().messages, newMessage] });
@@ -59,7 +65,7 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
   },
-  invitations: async (invitorUserId,invitedUserId)=>{
+  invitations: async (invitorUserId, invitedUserId) => {
     try {
       const res = await axiosInstance.post(
         "/contacts/addContact",
@@ -70,7 +76,6 @@ export const useChatStore = create((set, get) => ({
     } catch (error) {
       toast.error(error.message);
     }
-
   },
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: (selectedUser) => set({ selectedUser: selectedUser }),
 }));

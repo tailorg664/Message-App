@@ -4,7 +4,7 @@ import { useChatStore } from "../../../store/useChatStore";
 import { Users } from "lucide-react";
 
 function UserContacts() {
-  const { getUsers, users, isUsersLoading, setSelectedUser, selectedUser } =
+  const { getUsers, users, setSelectedUser, selectedUser } =
     useChatStore();
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = React.useState(false);
@@ -55,8 +55,8 @@ function UserContacts() {
           >
             <div className="relative mx-auto lg:mx-0">
               <img
-                src={user.profilePic || "/avatar.png"}
-                alt={user.name}
+                src={user.avatar || "/avatar.png"}
+                alt={user.fullname}
                 className="size-12 object-cover rounded-full"
               />
               {onlineUsers.includes(user._id) && (
@@ -69,7 +69,7 @@ function UserContacts() {
 
             {/* User info - only visible on larger screens */}
             <div className="hidden lg:block text-left min-w-0">
-              <div className="font-medium truncate">{user.fullName}</div>
+              <div className="font-medium truncate">{user.fullname}</div>
               <div className="text-sm text-zinc-400">
                 {onlineUsers.includes(user._id) ? "Online" : "Offline"}
               </div>

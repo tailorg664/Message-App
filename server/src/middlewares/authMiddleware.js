@@ -12,7 +12,7 @@ const verifyJwt = asyncHandler(async (req, res, next) => {
       throw new ApiError(401, "Unauthorized, please login");
     }
     const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET);
-    console.log(decodedToken);
+    
     
     if (!decodedToken) {
       throw new ApiError(401, "Token does not matches. Internal server error");

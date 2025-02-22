@@ -1,14 +1,13 @@
 const mongoose = require("mongoose");
 
 const contactSchema = new mongoose.Schema({
-  fullname: {
-    type: String,
-    required: true,
+  primaryUserId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
+  secondaryUserId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
   timestamp: {
     type: Date,
@@ -16,3 +15,12 @@ const contactSchema = new mongoose.Schema({
   },
 });
 module.exports = mongoose.model("Contact", contactSchema);
+// fullname: {
+//     type: String,
+//     required: true,
+//   },
+//   email: {
+//     type: String,
+//     unique: true,
+//     required: true,
+//   },
