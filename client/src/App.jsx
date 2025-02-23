@@ -9,7 +9,9 @@ import { Toaster } from "react-hot-toast";
 import InviteHandler from "./components/InviteHandler";
 
 function App() {
-  const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
+  const { checkAuth, authUser, isCheckingAuth,onlineUsers } = useAuthStore();
+  // console.log({onlineUsers});
+  
   useEffect(() => {
     checkAuth();
   }, [checkAuth, authUser]);

@@ -30,7 +30,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   if(recieverSocketId){
     io.to(recieverSocketId).emit("newMessage", newMessage);
   }
-  res.status(201).json(new ApiResponse(201, "Message sent", newMessage));
+  res.status(201).json(new ApiResponse(201, newMessage, "Message sent"));
 });
 exports.deleteMessage = asyncHandler(async (req, res) => {
   const messageId = req.body;
@@ -59,5 +59,5 @@ exports.getMessage = asyncHandler(async (req, res) => {
   if (!message) {
     throw new ApiError(404, "No messages found");
   }
-  res.status(200).json(new ApiResponse(200, "Messages found", message));
+  res.status(200).json(new ApiResponse(200, message, "Messages found"));
 });

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { toast } from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 const BASE_URL = "http://localhost:3000";
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -14,8 +14,11 @@ export const useAuthStore = create((set, get) => ({
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
+      const socket = get().socket;
       set({ authUser: res.data });
+      if(!socket) get().connectSocket();
     } catch (error) {
+      toast.error(error.message);
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
@@ -72,17 +75,21 @@ export const useAuthStore = create((set, get) => ({
   },
   connectSocket: () => {
     const { authUser } = get();
-    const socket = io(BASE_URL,{
-      query: { userId: authUser?._id },
+    const socket = io(BASE_URL, {
+      query: { userId: authUser._id },
     });
     if (!authUser || get().socket?.connected) return;
     socket.connect();
-    set({ socket: socket });
-    socket.on("getOnlineUsers",(userIds) => {
+    socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
-    })
+    });
+    set({ socket: socket });
   },
   disconnectSocket: () => {
-    if (get().socket?.connected) get().socket.disconnect();
+    const socket = get().socket;
+    if (socket?.connected) {
+      socket.disconnect();
+      set({ socket: null });
+    }
   },
 }));

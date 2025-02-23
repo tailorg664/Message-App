@@ -2,7 +2,6 @@ const express = require("express");
 const {app,server} = require("../src/utils/socket")
 const cors = require("cors");
 const connectDB = require("./db/index");
-const http = require("http");
 const cookieParser = require("cookie-parser");
 // database connection
 connectDB()

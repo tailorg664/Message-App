@@ -17,14 +17,10 @@ const messageSchema = new mongoose.Schema({
   image: {
     type: String,
   },
-  timestamp: {
-    type: Date,
-    default: Date.now, // When the message was sent
-  },
   isRead: {
     type: Boolean,
     default: false, // Tracks whether the message was read
   },
-});
+},{timestamps: true});
 const Message = mongoose.model("Message", messageSchema);
 module.exports = Message;

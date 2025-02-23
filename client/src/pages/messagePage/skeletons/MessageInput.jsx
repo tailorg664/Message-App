@@ -7,7 +7,7 @@ function MessageInput() {
   const [text, setText] = React.useState("");
   const [imagePreview, setImagePreview] = React.useState(null);
   const fileInputRef = React.useRef(null);
-  const sendMessage = useChatStore();
+  const {sendMessage} = useChatStore();
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file.type.startsWith("image")) {
@@ -31,7 +31,7 @@ function MessageInput() {
     if (!text.trim() && !imagePreview) return;
     try {
       await sendMessage({
-            text:text.trim(),
+            content:text.trim(),
             image:imagePreview
       })
 
@@ -41,7 +41,7 @@ function MessageInput() {
         fileInputRef.current.value = "";
       }
     } catch (error) {
-      console.error("Failed to send message",error);
+      toast.error(error.message);
     }
   };
   return (

@@ -23,7 +23,7 @@ export const useChatStore = create((set, get) => ({
   getMessages: async (userId) => {
     set({ isMessagesLoading: true });
     try {
-      const res = await axiosInstance.get(`/messages/get/${userId}`);
+      const res = await axiosInstance.get(`/messages/getMessages/${userId}`);
       set({ messages: res.data.data });
     } catch (error) {
       toast.error(error.message);
@@ -35,7 +35,7 @@ export const useChatStore = create((set, get) => ({
     const { selectedUser, messages } = get();
     try {
       const res = await axiosInstance.post(
-        `/messages/send/${selectedUser}`,
+        `/messages/send/${selectedUser._id}`,
         messageData
       );
       set({ messages: [...messages, res.data.data] });
@@ -47,15 +47,14 @@ export const useChatStore = create((set, get) => ({
     const { selectedUser } = get();
     if (!selectedUser) return;
     const socket = useAuthStore.getState().socket;
-     if (!socket) {
-       console.error("Socket is null. Ensure it is initialized.");
-       return;
-     }
-
+    if (!socket) {
+      console.error("Socket is null. Ensure it is initialized.");
+      return;
+    }
     socket.on("newMessage", (newMessage) => {
       // Check if the message is sent to the selected user
       const isMessageSentToSelectedUser =
-        newMessage.senderId === selectedUser._id;
+        newMessage.sender === selectedUser._id;
       if (!isMessageSentToSelectedUser) return;
       // Add the new message to the messages array
       set({ messages: [...get().messages, newMessage] });
@@ -63,7 +62,9 @@ export const useChatStore = create((set, get) => ({
   },
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
-    socket.off("newMessage");
+    if (socket) {
+      socket.off("newMessage");
+    }
   },
   invitations: async (invitorUserId, invitedUserId) => {
     try {
