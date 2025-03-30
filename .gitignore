@@ -1,2 +1,6 @@
 client/node_modules
 server/node_modules
+
+# .env
+server/config.env
+client/.env
