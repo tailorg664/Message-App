@@ -18,7 +18,7 @@ import InviteHandler from "./components/InviteHandler";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
-  const {theme}=useThemeStore()
+  const { theme } = useThemeStore();
   // console.log({onlineUsers});
 
   useEffect(() => {
@@ -40,23 +40,19 @@ function App() {
           path="/invite/:userId"
           element={authUser ? <InviteHandler /> : <Navigate to={"/login"} />}
         />
-        <Route
-          path="/message/:userId"
-          element={authUser ? <Message /> : <Navigate to={"/login"} />}
-        />
 
         <Route
-          path="/message"
+          path="/"
           element={authUser ? <Message /> : <Navigate to={"/login"} />}
         />
         {/* <Route path="/" element={<LandingPage />} /> */}
         <Route
           path="/signup"
-          element={!authUser ? <SignupPage /> : <Navigate to={"/message"} />}
+          element={!authUser ? <SignupPage /> : <Navigate to={"/"} />}
         />
         <Route
           path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to={"/message"} />}
+          element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
         />
         <Route path="/profile" element={<Profile />} />
         <Route path="/themes" element={<Themes />} />
