@@ -35,7 +35,8 @@ exports.createUser = asyncHandler(async (req, res) => {
   const token = await createToken(newUser._id);
   const options = {
     httpOnly: true,
-    secure: false,
+    secure: true,
+    sameSite: "None",
   };
   return res
     .status(201)
@@ -64,8 +65,9 @@ exports.loginUser = asyncHandler(async (req, res) => {
   console.log(loggedInUser);
 
   const options = {
-    httponly: true,
-    secure: false,
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
   };
   return res
     .status(200)
@@ -95,8 +97,9 @@ exports.logoutUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "User not found");
   }
   const options = {
-    httponly: true,
-    secure: false,
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
   };
   return res
     .status(200)
