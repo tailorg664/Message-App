@@ -3,7 +3,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { Eye, EyeOff, Loader2, Lock, MessageSquare, User } from "lucide-react";
 import { toast } from "react-hot-toast";
 import AuthImagePattern from "../../components/AuthImagePattern";
-
+import { Link } from "react-router-dom";
 function LoginPage() {
   // Password visibility state
   const [showPassword, setShowPassword] = useState(false);
@@ -106,6 +106,7 @@ function LoginPage() {
                 </button>
               </div>
             </div>
+            <div>Dont have an account? <Link to="/signup" className="text-primary">Sign up</Link></div>
             <button
               type="submit"
               className="btn btn-primary w-full"
