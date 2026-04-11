@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon src/app.js"
   },
+  "type": "module",
   "author": "Gaurav Tailor",
   "license": "ISC",
   "dependencies": {

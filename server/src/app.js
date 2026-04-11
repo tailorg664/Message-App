@@ -1,35 +1,34 @@
-const express = require("express");
-const {app,server} = require("../src/utils/socket")
-const cors = require("cors");
-const connectDB = require("./db/index");
-const cookieParser = require("cookie-parser");
-const dotenv = require("dotenv");
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+
+import connectDB from "./db/index.js";
+import userRouter from "./routes/UserRoutes.js";
+import messageRouter from "./routes/MessageRoutes.js";
+import contactRouter from "./routes/ContactRoutes.js";
+import { app, server } from "./utils/socket.js";
+
 dotenv.config({ path: "./config.env" });
-// database connection
-connectDB()
-  .then(() => console.log("Database connected"))
-  .catch(() => console.log("Error occured while connecting to database"));
-//port connection
+
+connectDB();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-//cors connection
-const origin = process.env.CLIENT_URL
+
+const origin = process.env.CLIENT_URL;
 const corsOptions = {
-  origin: origin,
-  methods: "GET,POST,PUT,DELETE",
+  origin,
+  methods: "*",
   credentials: true,
 };
+
 app.use(cors(corsOptions));
-//route connection
-const userRouter = require("./routes/UserRoutes");
-const messageRouter = require("./routes/MessageRoutes");
-const contactRouter = require("./routes/ContactRoutes");
 app.use("/api/auth/", userRouter);
 app.use("/api/contacts/", contactRouter);
 app.use("/api/messages/", messageRouter);
 
-//hosting
 server.listen(process.env.PORT, () => {
   console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });

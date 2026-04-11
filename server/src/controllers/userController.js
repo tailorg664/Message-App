@@ -1,9 +1,9 @@
-const User = require("../model/UserSchema");
-const asyncHandler = require("../utils/asyncHandler");
-const ApiResponse = require("../utils/ApiResponse");
-const ApiError = require("../utils/ApiError");
-const cloudinary = require("../utils/cloudinary.js");
-// Function to create refresh and access token
+import User from "../model/UserSchema.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import ApiError from "../utils/ApiError.js";
+import cloudinary from "../utils/cloudinary.js";
+
 const createToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -15,51 +15,55 @@ const createToken = async (userId) => {
     console.log(error);
   }
 };
-// Controllers
-exports.createUser = asyncHandler(async (req, res) => {
+
+const createUser = asyncHandler(async (req, res) => {
   const { fullname, email, password } = req.body;
   const existingUser = await User.findOne({ email });
+
   if (existingUser) {
     return res.status(400).json({ message: "User already exists" });
   }
-  // Create a new user
+
   const newUser = new User({
     fullname,
     email,
     password,
   });
+
   await newUser.save();
+
   if (!newUser) {
     return res.status(400).send("Please fill all the fields");
   }
+
   const token = await createToken(newUser._id);
   const options = {
     httpOnly: true,
     secure: true,
     sameSite: "None",
   };
+
   return res
     .status(201)
     .cookie("jwt", token, options)
     .json(new ApiResponse(201, newUser, "User registered Successfully"));
 });
-exports.loginUser = asyncHandler(async (req, res) => {
+
+const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  //check if the email is provided
-  if (!email) {
-    throw new ApiError(400, "Email is required for loging user!");
-  }
   const user = await User.findOne({ email });
-  //check if the user exists
+
   if (!user) {
     throw new ApiError(404, "User does not exist");
   }
-  // Compare input password with hashed password in the database
+
   const isPasswordValid = await user.isPasswordCorrect(password);
   console.log(isPasswordValid);
 
-  if (!isPasswordValid) throw new ApiError(401, "Invalid user credentials");
-  //token generation by calling the function createRefreshAndAccessToken
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid user credentials");
+  }
+
   const token = await createToken(user._id);
   const loggedInUser = await User.findById(user._id).select("-password -Token");
   console.log(loggedInUser);
@@ -69,6 +73,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
     secure: true,
     sameSite: "None",
   };
+
   return res
     .status(200)
     .cookie("jwt", token, options)
@@ -79,12 +84,14 @@ exports.loginUser = asyncHandler(async (req, res) => {
           user: loggedInUser,
           token,
         },
-        "Login successful"
-      )
+        "Login successful",
+      ),
     );
 });
-exports.logoutUser = asyncHandler(async (req, res) => {
+
+const logoutUser = asyncHandler(async (req, res) => {
   console.log(req.user);
+
   if (!req.user || !req.user._id) {
     return res
       .status(400)
@@ -93,20 +100,24 @@ exports.logoutUser = asyncHandler(async (req, res) => {
 
   const userId = req.user._id.toString().replace(/^String\("(.*)"\)$/, "$1");
   const user = await User.findByIdAndUpdate(userId, { token: undefined });
+
   if (!user) {
     throw new ApiError(400, "User not found");
   }
+
   const options = {
     httpOnly: true,
     secure: true,
     sameSite: "None",
   };
+
   return res
     .status(200)
     .clearCookie("jwt", options)
     .json(new ApiResponse(200, {}, "user logged out"));
 });
-exports.checkAuth = asyncHandler(async (req, res) => {
+
+const checkAuth = asyncHandler(async (req, res) => {
   try {
     res.status(200).json(req.user);
   } catch (error) {
@@ -114,18 +125,21 @@ exports.checkAuth = asyncHandler(async (req, res) => {
     throw new ApiError(401, "User is not authenticated");
   }
 });
-exports.updateProfile = asyncHandler(async (req, res) => {
+
+const updateProfile = asyncHandler(async (req, res) => {
   try {
     const { avatar } = req.body;
     const userId = req.user._id;
+
     if (!avatar) {
       throw new ApiError(400, "Please provide a profile picture");
     }
+
     const uploadResponse = await cloudinary.uploader.upload(avatar);
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { avatar: uploadResponse.secure_url },
-      { new: true }
+      { new: true },
     );
 
     res.status(200).json(updatedUser);
@@ -134,3 +148,5 @@ exports.updateProfile = asyncHandler(async (req, res) => {
     res.status(400).json(new ApiResponse(400, {}, "Internal server error."));
   }
 });
+
+export { createUser, loginUser, logoutUser, checkAuth, updateProfile };

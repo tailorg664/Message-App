@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+
 const userSchema = new mongoose.Schema(
   {
     fullname: { type: String, required: true },
@@ -15,16 +16,14 @@ const userSchema = new mongoose.Schema(
     contacts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Contact", // Reference to the Contact model
+        ref: "Contact",
       },
     ],
     lastSeen: { type: Date },
     token: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
-
-// Model creation
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
@@ -32,6 +31,7 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
+
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
@@ -44,8 +44,10 @@ userSchema.methods.generateToken = function () {
     process.env.TOKEN_SECRET,
     {
       expiresIn: process.env.TOKEN_EXPIRY,
-    }
+    },
   );
 };
+
 const User = mongoose.model("User", userSchema);
-module.exports = User;
+
+export default User;

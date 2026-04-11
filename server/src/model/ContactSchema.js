@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const contactSchema = new mongoose.Schema({
   primaryUserId: {
@@ -14,13 +14,7 @@ const contactSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-module.exports = mongoose.model("Contact", contactSchema);
-// fullname: {
-//     type: String,
-//     required: true,
-//   },
-//   email: {
-//     type: String,
-//     unique: true,
-//     required: true,
-//   },
+
+const Contact = mongoose.model("Contact", contactSchema);
+
+export default Contact;

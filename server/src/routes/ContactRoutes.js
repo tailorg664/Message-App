@@ -1,9 +1,11 @@
-const express = require("express");
+import express from "express";
+
+import * as contactController from "../controllers/contactController.js";
+import verifyJwt from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
-const verifyJwt = require("../middlewares/authMiddleware");
-const contactController = require("../controllers/contactController");
-//route definition
-router.route("/displayContacts").get(verifyJwt,contactController.getContacts);
-router.route("/addContact").post( contactController.addContact);
-//routes described
-module.exports = router;
+
+router.route("/displayContacts").get(verifyJwt, contactController.getContacts);
+router.route("/addContact").post(contactController.addContact);
+
+export default router;

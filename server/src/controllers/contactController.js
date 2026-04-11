@@ -1,55 +1,61 @@
-const Contact = require("../model/ContactSchema");
-const User = require("../model/UserSchema");
-const asyncHandler = require("../utils/asyncHandler");
-const ApiResponse = require("../utils/ApiResponse");
-const ApiError = require("../utils/ApiError");
+import Contact from "../model/ContactSchema.js";
+import User from "../model/UserSchema.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import ApiError from "../utils/ApiError.js";
 
-exports.addContact = asyncHandler(async (req, res) => {
-  // importing data from the body
+const addContact = asyncHandler(async (req, res) => {
   try {
     const { chatOrganizerId, userToInviteId } = req.body;
     const chatOrganizer = await User.findById(chatOrganizerId);
     console.log(chatOrganizer);
+
     if (!chatOrganizer) {
       throw new ApiError(404, "Chat Organizer not found");
     }
 
-    // creating a new contact
     const contact = new Contact({
       primaryUserId: chatOrganizerId,
       secondaryUserId: userToInviteId,
     });
+
     await contact.save();
-    // saving the contact to the user
+
     await User.findByIdAndUpdate(
       chatOrganizerId,
       {
         $push: { contacts: contact._id },
       },
-      { new: true }
+      { new: true },
     );
+
     await User.findByIdAndUpdate(
       userToInviteId,
       {
         $push: { contacts: contact._id },
       },
-      { new: true }
+      { new: true },
     );
+
     res.status(201).json(new ApiResponse(201, "Contact added", contact));
   } catch (error) {
     console.log(error);
   }
 });
-exports.getContacts = asyncHandler(async (req, res) => {
+
+const getContacts = asyncHandler(async (req, res) => {
   const userId = req.user._id;
+
   if (!userId) {
     throw new ApiError(404, "invalid user entry");
   }
+
   const userContacts = await User.findById(userId).populate("contacts").lean();
   const contactInfo = [];
+
   for (const contact of userContacts.contacts) {
-    const userInfo = async (userId) => {
-      return await User.findById(userId)
+    const userInfo = async (contactUserId) => {
+      return await User.findById(contactUserId)
         .select("fullname status avatar")
         .lean();
     };
@@ -66,6 +72,10 @@ exports.getContacts = asyncHandler(async (req, res) => {
   if (!userContacts) {
     throw new ApiError(404, "Contacts not found");
   }
+
   res.status(200).json(new ApiResponse(200, contactInfo, "Contacts retrieved"));
 });
-exports.updateContact = asyncHandler(async (req, res) => {});
+
+const updateContact = asyncHandler(async (req, res) => {});
+
+export { addContact, getContacts, updateContact };
