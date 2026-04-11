@@ -16,10 +16,10 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-const origin = process.env.CLIENT_URL;
+const localClientURL = process.env.CLIENT_URL_LOCAL || "http://localhost:5173";
+const mainClientURL = process.env.CLIENT_URL_MAIN;
 const corsOptions = {
-  origin,
+  origin: [localClientURL, mainClientURL],
   methods: "*",
   credentials: true,
 };
