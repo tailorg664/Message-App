@@ -16,6 +16,10 @@ const createToken = async (userId) => {
   }
 };
 
+const checker =  (req, res) => {
+  res.send("Checker function is working");
+  res.status(200).json({ message: "Checker function is working" });
+};
 const createUser = asyncHandler(async (req, res) => {
   const { fullname, email, password } = req.body;
   const existingUser = await User.findOne({ email });
@@ -149,4 +153,4 @@ const updateProfile = asyncHandler(async (req, res) => {
   }
 });
 
-export { createUser, loginUser, logoutUser, checkAuth, updateProfile };
+export { checker,createUser, loginUser, logoutUser, checkAuth, updateProfile };

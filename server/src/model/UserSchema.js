@@ -13,12 +13,6 @@ const userSchema = new mongoose.Schema(
       enum: ["online", "offline"],
       default: "offline",
     },
-    contacts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Contact",
-      },
-    ],
     lastSeen: { type: Date },
     token: { type: String },
   },

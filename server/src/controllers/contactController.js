@@ -7,11 +7,38 @@ import ApiError from "../utils/ApiError.js";
 const addContact = asyncHandler(async (req, res) => {
   try {
     const { chatOrganizerId, userToInviteId } = req.body;
-    const chatOrganizer = await User.findById(chatOrganizerId);
-    console.log(chatOrganizer);
+    const [chatOrganizer, userToInvite] = await Promise.all([
+      User.findById(chatOrganizerId),
+      User.findById(userToInviteId),
+    ]);
 
     if (!chatOrganizer) {
       throw new ApiError(404, "Chat Organizer not found");
+    }
+
+    if (!userToInvite) {
+      throw new ApiError(404, "User to invite not found");
+    }
+
+    if (chatOrganizerId === userToInviteId) {
+      throw new ApiError(400, "You cannot add yourself as a contact");
+    }
+
+    const existingContact = await Contact.findOne({
+      $or: [
+        {
+          primaryUserId: chatOrganizerId,
+          secondaryUserId: userToInviteId,
+        },
+        {
+          primaryUserId: userToInviteId,
+          secondaryUserId: chatOrganizerId,
+        },
+      ],
+    });
+
+    if (existingContact) {
+      throw new ApiError(409, "Contact already exists");
     }
 
     const contact = new Contact({
@@ -21,25 +48,9 @@ const addContact = asyncHandler(async (req, res) => {
 
     await contact.save();
 
-    await User.findByIdAndUpdate(
-      chatOrganizerId,
-      {
-        $push: { contacts: contact._id },
-      },
-      { new: true },
-    );
-
-    await User.findByIdAndUpdate(
-      userToInviteId,
-      {
-        $push: { contacts: contact._id },
-      },
-      { new: true },
-    );
-
-    res.status(201).json(new ApiResponse(201, "Contact added", contact));
+    res.status(201).json(new ApiResponse(201, contact, "Contact added"));
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 });
 
@@ -50,28 +61,21 @@ const getContacts = asyncHandler(async (req, res) => {
     throw new ApiError(404, "invalid user entry");
   }
 
-  const userContacts = await User.findById(userId).populate("contacts").lean();
-  const contactInfo = [];
+  const contacts = await Contact.find({
+    $or: [{ primaryUserId: userId }, { secondaryUserId: userId }],
+  }).lean();
 
-  for (const contact of userContacts.contacts) {
-    const userInfo = async (contactUserId) => {
-      return await User.findById(contactUserId)
-        .select("fullname status avatar")
-        .lean();
-    };
+  const contactUserIds = contacts.map((contact) =>
+    contact.primaryUserId.toString() === userId.toString()
+      ? contact.secondaryUserId.toString()
+      : contact.primaryUserId.toString(),
+  );
 
-    if (contact.primaryUserId.toString() !== userId.toString()) {
-      contactInfo.push(await userInfo(contact.primaryUserId.toString()));
-    } else if (contact.secondaryUserId.toString() !== userId.toString()) {
-      contactInfo.push(await userInfo(contact.secondaryUserId.toString()));
-    }
-  }
-
-  console.log(contactInfo);
-
-  if (!userContacts) {
-    throw new ApiError(404, "Contacts not found");
-  }
+  const contactInfo = await User.find({
+    _id: { $in: contactUserIds },
+  })
+    .select("fullname status avatar")
+    .lean();
 
   res.status(200).json(new ApiResponse(200, contactInfo, "Contacts retrieved"));
 });
