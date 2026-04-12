@@ -16,7 +16,7 @@ const createToken = async (userId) => {
   }
 };
 
-const checker =  (req, res) => {
+const checker = (req, res) => {
   res.send("Checker function is working");
   res.status(200).json({ message: "Checker function is working" });
 };
@@ -41,16 +41,16 @@ const createUser = asyncHandler(async (req, res) => {
   }
 
   const token = await createToken(newUser._id);
-  const options = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-  };
 
   return res
     .status(201)
-    .cookie("jwt", token, options)
-    .json(new ApiResponse(201, newUser, "User registered Successfully"));
+    .json(
+      new ApiResponse(
+        201,
+        { data: newUser, token: token },
+        "User registered Successfully",
+      ),
+    );
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -153,4 +153,4 @@ const updateProfile = asyncHandler(async (req, res) => {
   }
 });
 
-export { checker,createUser, loginUser, logoutUser, checkAuth, updateProfile };
+export { checker, createUser, loginUser, logoutUser, checkAuth, updateProfile };

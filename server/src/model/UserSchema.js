@@ -8,13 +8,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     avatar: { type: String, default: "" },
     password: { type: String, required: true },
-    status: {
-      type: String,
-      enum: ["online", "offline"],
-      default: "offline",
-    },
     lastSeen: { type: Date },
-    token: { type: String },
   },
   { timestamps: true },
 );

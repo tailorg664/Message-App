@@ -7,6 +7,9 @@ import connectDB from "./db/index.js";
 import userRouter from "./routes/UserRoutes.js";
 import messageRouter from "./routes/MessageRoutes.js";
 import contactRouter from "./routes/ContactRoutes.js";
+
+//importing the app and server from the socket.js file to use for both express and socket.io functionalities
+//socker.io is running on top of the express server.
 import { app, server } from "./utils/socket.js";
 
 dotenv.config({ path: "./config.env" });

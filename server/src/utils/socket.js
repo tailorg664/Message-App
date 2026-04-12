@@ -2,7 +2,7 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
-import Contact from "../model/ContactSchema.js";
+import Conversation from "../model/ConversationSchema.js";
 
 dotenv.config({ path: "./config.env" });
 
