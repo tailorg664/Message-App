@@ -4,6 +4,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import cloudinary from "../utils/cloudinary.js";
+//add friend to the contact list of the user
 const addFriend = asyncHandler(async (req, res) => {
   try {
     const userId = req.user._id;
@@ -46,11 +47,12 @@ const addFriend = asyncHandler(async (req, res) => {
     throw new ApiError({ message: error.message, stack: error.stack });
   }
 });
-const createFriendGroup = asyncHandler(async (req,res)=>{
+// create a friend group with a name, icon and multiple friends
+const createFriendGroup = asyncHandler(async (req, res) => {
   try {
     //get the data from the request
     const userId = req.user._id;
-    const { emails, groupName,groupIcon } = req.body;
+    const { emails, groupName, groupIcon } = req.body;
 
     // get all friend ids from the emails provided and validate them
     const users = await User.find({ email: { $in: emails } })
@@ -62,7 +64,7 @@ const createFriendGroup = asyncHandler(async (req,res)=>{
     }
     // group icon functionality
     let uploadResult = null;
-    if(groupIcon){
+    if (groupIcon) {
       uploadResult = await cloudinary.uploader.upload(groupIcon);
     }
     // create the group conversation
@@ -77,38 +79,74 @@ const createFriendGroup = asyncHandler(async (req,res)=>{
     // save it to the database
     await createdGroupInstance.save();
     // send the response
-    res.status(201).json(new ApiResponse(201, createdGroupInstance, "Group created"));
+    res
+      .status(201)
+      .json(new ApiResponse(201, createdGroupInstance, "Group created"));
+  } catch (error) {
+    throw new ApiError({ message: error.message, stack: error.stack });
+  }
+});
+// get all the connections of the user
+const getConnections = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    if (!userId) {
+      throw new ApiError(404, "invalid user entry");
+    }
+
+    const connections = await Conversation.find({
+      participants: userId,
+    })
+      .populate("participants", "fullname avatar")
+      .lean();
+    const contactInfo = connections.map((connection) => {
+      const otherParticipants = connection.participants.filter(
+        (participant) => participant._id.toString() !== userId.toString(),
+      );
+      return {
+        _id: connection._id,
+        connectionType: connection.connectionType,
+        participants: otherParticipants,
+        groupMetadata: connection.groupMetadata,
+      };
+    });
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, contactInfo, "Contacts retrieved"));
+
+  } catch (error) {
+    throw new ApiError({ message: error.message, stack: error.stack });
+  }
+  });
+// delete a contact from the contact list of the user
+
+const deleteContact = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const contactId = req.params.contactId;
+
+    if (!userId) {
+      throw new ApiError(404, "invalid user entry");
+    }
+
+    if (!contactId) {
+      throw new ApiError(404, "invalid contact entry");
+    }
+
+    const connection = await Conversation.findOneAndDelete({
+      _id: contactId,
+      participants: userId,
+    }).lean();
+
+    if (!connection) {
+      throw new ApiError(404, "Contact not found or already deleted");
+    }
+
+    res.status(200).json(new ApiResponse(200, null, "Contact deleted"));
   } catch (error) {
     throw new ApiError({ message: error.message, stack: error.stack });
   }
 })
-const getConnections = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
-
-  if (!userId) {
-    throw new ApiError(404, "invalid user entry");
-  }
-
-  const connections = await Conversation.find({
-    participants: userId,
-  }).populate("participants" , "fullname status avatar").lean();
-  const contactInfo = connections.map((connection) => {
-    const otherParticipants = connection.participants.filter(
-      (participant) => participant._id.toString() !== userId.toString(),
-    );
-    return {
-      _id: connection._id,
-      connectionType: connection.connectionType,
-      participants: otherParticipants,
-      groupMetadata: connection.groupMetadata,
-    };
-  });
-  
-
-  res.status(200).json(new ApiResponse(200, contactInfo, "Contacts retrieved"));
-});
-
-const updateContact = asyncHandler(async (req, res) => {});
-
-export { addFriend,createFriendGroup, getConnections };
-// export { addContact, getContacts, updateContact };
+export { addFriend, createFriendGroup, getConnections, deleteContact };

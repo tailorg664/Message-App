@@ -32,4 +32,6 @@ const ConversationSchema = new mongoose.Schema(
 ConversationSchema.index({ participants: 1 });
 
 const Conversation = mongoose.model("Conversation", ConversationSchema);
+
+// Todo : chat deletion middleware.
 export default Conversation;
