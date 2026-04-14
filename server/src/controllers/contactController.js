@@ -4,6 +4,25 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import cloudinary from "../utils/cloudinary.js";
+
+const getCloudinaryPublicIdFromUrl = (url) => {
+  if (!url) {
+    return null;
+  }
+
+  const uploadMarker = "/upload/";
+  const uploadIndex = url.indexOf(uploadMarker);
+
+  if (uploadIndex === -1) {
+    return null;
+  }
+
+  const assetPath = url.slice(uploadIndex + uploadMarker.length);
+  const normalizedPath = assetPath.replace(/^v\d+\//, "");
+
+  return normalizedPath.replace(/\.[^/.]+$/, "");
+};
+
 //add friend to the contact list of the user
 const addFriend = asyncHandler(async (req, res) => {
   try {
@@ -47,12 +66,12 @@ const addFriend = asyncHandler(async (req, res) => {
     throw new ApiError({ message: error.message, stack: error.stack });
   }
 });
-// create a friend group with a name, icon and multiple friends
+// create a friend group with a name, icon and multiple friends, and add authorization 
 const createFriendGroup = asyncHandler(async (req, res) => {
   try {
     //get the data from the request
     const userId = req.user._id;
-    const { emails, groupName, groupIcon } = req.body;
+    const { emails, groupName, groupIcon,groupDescription } = req.body;
 
     // get all friend ids from the emails provided and validate them
     const users = await User.find({ email: { $in: emails } })
@@ -69,11 +88,13 @@ const createFriendGroup = asyncHandler(async (req, res) => {
     }
     // create the group conversation
     const createdGroupInstance = await Conversation.create({
-      participants: [userId, ...friendIds],
+      participants: [{user : userId, role: "admin"}, ...friendIds.map((id) => ({ user: id, role: "member" }))],
       connectionType: "group",
       groupMetadata: {
         name: groupName,
         icon: uploadResult?.secure_url,
+        description: groupDescription,
+        createdBy:userId
       },
     });
     // save it to the database
@@ -149,4 +170,108 @@ const deleteContact = asyncHandler(async (req, res) => {
     throw new ApiError({ message: error.message, stack: error.stack });
   }
 })
-export { addFriend, createFriendGroup, getConnections, deleteContact };
+
+const updateGroupMetaData = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const groupId = req.params.groupId;
+    const { groupName, groupDescription } = req.body;
+    const oldGroup = req.group;
+    //validation for user and group entries
+    if(!userId){
+      throw new ApiError(404, "invalid user entry");
+    }
+    //access control middleware added to check group existence and user participation
+    const group = await Conversation.findByIdAndUpdate(
+      groupId,
+      {
+        $set: {
+          "groupMetadata.name": groupName,
+          "groupMetadata.description": groupDescription
+        },
+      },
+      { new: true },
+    ).lean();
+    res.status(200).json(new ApiResponse(200, group, "Group info updated"));
+  } catch (error) {
+    throw new ApiError({ message: error.message, stack: error.stack });
+  }
+});
+
+const updateGroupIcon = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const groupId = req.params.groupId;
+    const { groupIcon } = req.body;
+    const oldGroup = req.group;
+    //validation for user and group entries
+    if(!userId){
+      throw new ApiError(404, "invalid user entry");
+    }
+    // group icon functionality
+    let uploadResult = null;
+    if (groupIcon) {
+      uploadResult = await cloudinary.uploader.upload(groupIcon);
+    }
+
+    const oldIconPublicId = getCloudinaryPublicIdFromUrl(oldGroup?.groupMetadata?.icon);
+    if (oldIconPublicId) {
+      await cloudinary.uploader.destroy(oldIconPublicId);
+    }
+
+    const group = await Conversation.findByIdAndUpdate(
+      groupId,
+      {
+        $set: {
+          "groupMetadata.icon": uploadResult?.secure_url,
+        },
+      },
+      { new: true },
+    ).lean();
+    res.status(200).json(new ApiResponse(200, group, "Group icon updated"));
+  } catch (error) {
+    throw new ApiError({ message: error.message, stack: error.stack });
+  }
+});
+
+const adminAccessControl = asyncHandler(async(req, res) => {
+  try {
+    const userId = req.user._id;
+    const group = req.group;
+    const { editAccess, inviteAccess } = req.body;
+    // are you admin
+    const isAdmin = group.participants.some(
+      (participant) =>
+        participant.user.toString() === userId.toString() &&
+        participant.role === "admin",
+    );
+    if (!isAdmin) {
+      throw new ApiError(403, "Access denied. Admins only.");
+    }
+    const updateAccess = await Conversation.findByIdAndUpdate(
+      group._id,
+      {
+        $set: {
+          "groupMetadata.settings.membersCanEditInfo": editAccess,
+          "groupMetadata.settings.membersCanInvite": inviteAccess,
+        },
+      },
+      { new: true },
+    ).lean();
+    res
+      .status(200)
+      .json(new ApiResponse(200, updateAccess, "Group settings updated"));
+  } catch (error) {
+    throw new ApiError({ message: error.message, stack: error.stack });
+  }
+});
+
+export {
+  addFriend,
+  createFriendGroup,
+  getConnections,
+  deleteContact,
+  updateGroupMetaData,
+  updateGroupIcon,
+  adminAccessControl
+};
