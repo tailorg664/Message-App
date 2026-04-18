@@ -47,7 +47,7 @@ const createUser = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         201,
-        { data: newUser, token: token },
+        { user: newUser, token: token },
         "User registered Successfully",
       ),
     );
@@ -78,19 +78,16 @@ const loginUser = asyncHandler(async (req, res) => {
     sameSite: "None",
   };
 
-  return res
-    .status(200)
-    .cookie("jwt", token, options)
-    .json(
-      new ApiResponse(
-        200,
-        {
-          user: loggedInUser,
-          token,
-        },
-        "Login successful",
-      ),
-    );
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        user: loggedInUser,
+        token,
+      },
+      "Login successful",
+    ),
+  );
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
@@ -115,10 +112,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     sameSite: "None",
   };
 
-  return res
-    .status(200)
-    .clearCookie("jwt", options)
-    .json(new ApiResponse(200, {}, "user logged out"));
+  return res.status(200).json(new ApiResponse(200, {}, "user logged out"));
 });
 
 const checkAuth = asyncHandler(async (req, res) => {

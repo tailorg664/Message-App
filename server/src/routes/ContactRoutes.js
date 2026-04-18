@@ -6,14 +6,35 @@ import canEditGroupInfo from "../middlewares/authorizationMiddleware.js";
 import requireGroup from "../middlewares/groupMiddleware.js";
 const router = express.Router();
 
-router.route("/add-friend").post(verifyJwt, contactController.addFriend);
-router.route("/create-friend-group").post(verifyJwt, contactController.createFriendGroup);
-router.route("/display-friend-connections").get(verifyJwt, contactController.getConnections);
-router.route("/delete-friend").delete(verifyJwt, contactController.deleteContact);
+router
+  .route("/add-friend")
+  .post(verifyJwt, contactController.addFriend);
+router
+  .route("/create-friend-group")
+  .post(verifyJwt, contactController.createFriendGroup);
+router
+  .route("/display-friend-connections")
+  .get(verifyJwt, contactController.getConnections);
+router
+  .route("/delete-friend")
+  .delete(verifyJwt, contactController.deleteContact);
 router
   .route("/update-group-metadata/:groupId")
-  .put(verifyJwt, requireGroup, canEditGroupInfo, contactController.updateGroupMetaData);
+  .put(
+    verifyJwt,
+    requireGroup,
+    canEditGroupInfo,
+    contactController.updateGroupMetaData,
+  );
 router
   .route("/update-group-icon/:groupId")
-  .put(verifyJwt, requireGroup, canEditGroupInfo, contactController.updateGroupIcon);
+  .put(
+    verifyJwt,
+    requireGroup,
+    canEditGroupInfo,
+    contactController.updateGroupIcon,
+  );
+router
+  .route("/exit-group/:groupId")
+  .delete(verifyJwt, requireGroup, contactController.exitGroup);
 export default router;

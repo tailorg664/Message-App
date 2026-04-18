@@ -27,27 +27,31 @@ const getCloudinaryPublicIdFromUrl = (url) => {
 const addFriend = asyncHandler(async (req, res) => {
   try {
     const userId = req.user._id;
-    const friendId = await User.findOne({ email: req.body.email })
-      .select("_id")
+    const friend = await User.findOne({ email: req.body.email })
+      .select("_id email")
       .lean();
     if (!userId) {
       throw new ApiError(404, "invalid user entry");
     }
 
-    if (!friendId) {
+    if (!friend) {
       throw new ApiError(
         404,
         "Friend does not exist. Please check the email and try again.",
       );
     }
 
-    if (userId === friendId) {
+    if (userId.toString() === friend._id.toString()) {
       throw new ApiError(400, "You cannot add yourself as a contact");
     }
 
     const existingFriend = await Conversation.findOne({
       connectionType: "friend",
-      participants: { $all: [userId, friendId] },
+      participants: { $size: 2 },
+      $and: [
+        { participants: { $elemMatch: { user: userId } } },
+        { participants: { $elemMatch: { user: friend._id } } },
+      ],
     }).lean();
 
     if (existingFriend) {
@@ -57,21 +61,27 @@ const addFriend = asyncHandler(async (req, res) => {
     }
     const connection = await Conversation.create({
       connectionType: "friend",
-      participants: [userId, friendId],
+      participants: [{ user: userId }, { user: friend._id }],
     });
     await connection.save();
 
-    res.status(201).json(new ApiResponse(201, connection, "Contact added"));
+    return res
+      .status(201)
+      .json(new ApiResponse(201, connection, "Contact added"));
   } catch (error) {
-    throw new ApiError({ message: error.message, stack: error.stack });
+    throw new ApiError({
+      status: error.status,
+      message: error.message,
+      stack: error.stack,
+    });
   }
 });
-// create a friend group with a name, icon and multiple friends, and add authorization 
+// create a friend group with a name, icon and multiple friends, and add authorization
 const createFriendGroup = asyncHandler(async (req, res) => {
   try {
     //get the data from the request
     const userId = req.user._id;
-    const { emails, groupName, groupIcon,groupDescription } = req.body;
+    const { emails, groupName, groupIcon, groupDescription } = req.body;
 
     // get all friend ids from the emails provided and validate them
     const users = await User.find({ email: { $in: emails } })
@@ -88,13 +98,16 @@ const createFriendGroup = asyncHandler(async (req, res) => {
     }
     // create the group conversation
     const createdGroupInstance = await Conversation.create({
-      participants: [{user : userId, role: "admin"}, ...friendIds.map((id) => ({ user: id, role: "member" }))],
+      participants: [
+        { user: userId, role: "admin" },
+        ...friendIds.map((id) => ({ user: id, role: "member" })),
+      ],
       connectionType: "group",
       groupMetadata: {
         name: groupName,
         icon: uploadResult?.secure_url,
         description: groupDescription,
-        createdBy:userId
+        createdBy: userId,
       },
     });
     // save it to the database
@@ -117,9 +130,9 @@ const getConnections = asyncHandler(async (req, res) => {
     }
 
     const connections = await Conversation.find({
-      participants: userId,
+      "participants.user": userId,
     })
-      .populate("participants", "fullname avatar")
+      .populate("participants.user", "fullname avatar")
       .lean();
     const contactInfo = connections.map((connection) => {
       const otherParticipants = connection.participants.filter(
@@ -136,11 +149,10 @@ const getConnections = asyncHandler(async (req, res) => {
     res
       .status(200)
       .json(new ApiResponse(200, contactInfo, "Contacts retrieved"));
-
   } catch (error) {
     throw new ApiError({ message: error.message, stack: error.stack });
   }
-  });
+});
 // delete a contact from the contact list of the user
 
 const deleteContact = asyncHandler(async (req, res) => {
@@ -169,7 +181,7 @@ const deleteContact = asyncHandler(async (req, res) => {
   } catch (error) {
     throw new ApiError({ message: error.message, stack: error.stack });
   }
-})
+});
 
 const updateGroupMetaData = asyncHandler(async (req, res) => {
   try {
@@ -178,7 +190,7 @@ const updateGroupMetaData = asyncHandler(async (req, res) => {
     const { groupName, groupDescription } = req.body;
     const oldGroup = req.group;
     //validation for user and group entries
-    if(!userId){
+    if (!userId) {
       throw new ApiError(404, "invalid user entry");
     }
     //access control middleware added to check group existence and user participation
@@ -187,7 +199,7 @@ const updateGroupMetaData = asyncHandler(async (req, res) => {
       {
         $set: {
           "groupMetadata.name": groupName,
-          "groupMetadata.description": groupDescription
+          "groupMetadata.description": groupDescription,
         },
       },
       { new: true },
@@ -205,7 +217,7 @@ const updateGroupIcon = asyncHandler(async (req, res) => {
     const { groupIcon } = req.body;
     const oldGroup = req.group;
     //validation for user and group entries
-    if(!userId){
+    if (!userId) {
       throw new ApiError(404, "invalid user entry");
     }
     // group icon functionality
@@ -214,7 +226,9 @@ const updateGroupIcon = asyncHandler(async (req, res) => {
       uploadResult = await cloudinary.uploader.upload(groupIcon);
     }
 
-    const oldIconPublicId = getCloudinaryPublicIdFromUrl(oldGroup?.groupMetadata?.icon);
+    const oldIconPublicId = getCloudinaryPublicIdFromUrl(
+      oldGroup?.groupMetadata?.icon,
+    );
     if (oldIconPublicId) {
       await cloudinary.uploader.destroy(oldIconPublicId);
     }
@@ -234,7 +248,7 @@ const updateGroupIcon = asyncHandler(async (req, res) => {
   }
 });
 
-const adminAccessControl = asyncHandler(async(req, res) => {
+const adminAccessControl = asyncHandler(async (req, res) => {
   try {
     const userId = req.user._id;
     const group = req.group;
@@ -266,6 +280,71 @@ const adminAccessControl = asyncHandler(async(req, res) => {
   }
 });
 
+const exitGroup = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const groupId = req.params.groupId;
+
+    const group = await Conversation.findById(groupId);
+    if (!group) {
+      throw new ApiError(404, "Group not found");
+    }
+
+    if (group.connectionType !== "group") {
+      throw new ApiError(400, "The specified contact is not a group");
+    }
+
+    const participantIndex = group.participants.findIndex(
+      (participant) => participant.user.toString() === userId.toString(),
+    );
+    if (participantIndex === -1) {
+      throw new ApiError(403, "You are not a participant of this group");
+    }
+
+    const exitingParticipant = group.participants[participantIndex];
+
+    // If this is the last participant, remove the whole group to avoid orphaned records.
+    if (group.participants.length === 1) {
+      const oldIconPublicId = getCloudinaryPublicIdFromUrl(
+        group.groupMetadata?.icon,
+      );
+      if (oldIconPublicId) {
+        await cloudinary.uploader.destroy(oldIconPublicId);
+      }
+
+      await Conversation.findByIdAndDelete(groupId);
+      return res.status(200).json(new ApiResponse(200, null, "Exited group"));
+    }
+
+    // When the last admin exits, promote another remaining participant before saving.
+    if (exitingParticipant.role === "admin") {
+      const otherAdmins = group.participants.filter(
+        (participant) =>
+          participant.role === "admin" &&
+          participant.user.toString() !== userId.toString(),
+      );
+
+      if (otherAdmins.length === 0) {
+        const nextMember = group.participants.find(
+          (participant) => participant.user.toString() !== userId.toString(),
+        );
+
+        if (nextMember) {
+          nextMember.role = "admin";
+        }
+      }
+    }
+
+    // Apply all participant changes in memory and persist them in a single save.
+    group.participants.splice(participantIndex, 1);
+    const updatedGroup = await group.save();
+
+    res.status(200).json(new ApiResponse(200, updatedGroup, "Exited group"));
+  } catch (error) {
+    throw new ApiError({ message: error.message, stack: error.stack });
+  }
+});
+
 export {
   addFriend,
   createFriendGroup,
@@ -273,5 +352,6 @@ export {
   deleteContact,
   updateGroupMetaData,
   updateGroupIcon,
-  adminAccessControl
+  adminAccessControl,
+  exitGroup,
 };

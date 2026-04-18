@@ -6,8 +6,7 @@ import ApiError from "../utils/ApiError.js";
 
 const verifyJwt = asyncHandler(async (req, res, next) => {
   try {
-    const token =
-      req.cookies?.jwt || req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       throw new ApiError(401, "Unauthorized, please login");
