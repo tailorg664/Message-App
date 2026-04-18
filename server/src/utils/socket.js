@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 import Conversation from "../model/ConversationSchema.js";
 
 dotenv.config({ path: "./config.env" });
@@ -28,22 +29,62 @@ function getOnlineUserIds() {
   return Object.keys(userSocketMap);
 }
 
+io.use((socket, next) => {
+  try {
+    const rawToken = socket.handshake.auth?.token;
+
+    if (!rawToken) {
+      return next(new Error("Unauthorized"));
+    }
+
+    const token = rawToken.startsWith("Bearer ")
+      ? rawToken.replace("Bearer ", "")
+      : rawToken;
+    const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET);
+
+    if (!decodedToken?._id) {
+      return next(new Error("Unauthorized"));
+    }
+
+    socket.data.userId = decodedToken._id.toString();
+    return next();
+  } catch (error) {
+    return next(new Error("Unauthorized"));
+  }
+});
+
 async function getRelatedUserIds(userId) {
-  const contacts = await Contact.find({
-    $or: [{ primaryUserId: userId }, { secondaryUserId: userId }],
-  }).lean();
+  const conversations = await Conversation.find({
+    "participants.user": userId,
+  })
+    .select("participants.user")
+    .lean();
 
-  return contacts
-    .map((contact) => {
-      if (!contact?.primaryUserId || !contact?.secondaryUserId) {
-        return null;
+  const relatedUserIds = new Set();
+
+  for (const conversation of conversations) {
+    for (const participant of conversation.participants || []) {
+      const participantId = participant?.user?.toString();
+
+      if (participantId && participantId !== userId.toString()) {
+        relatedUserIds.add(participantId);
       }
+    }
+  }
 
-      return contact.primaryUserId.toString() === userId.toString()
-        ? contact.secondaryUserId.toString()
-        : contact.primaryUserId.toString();
-    })
-    .filter(Boolean);
+  return [...relatedUserIds];
+}
+
+async function joinUserConversationRooms(socket, userId) {
+  const conversations = await Conversation.find({
+    "participants.user": userId,
+  })
+    .select("_id")
+    .lean();
+
+  for (const conversation of conversations) {
+    socket.join(conversation._id.toString());
+  }
 }
 
 async function emitOnlineContacts(userId) {
@@ -72,7 +113,7 @@ async function emitPresenceUpdates(userId) {
 
 io.on("connection", async (socket) => {
   console.log("A user connected", socket.id);
-  const userId = socket.handshake.query.userId;
+  const userId = socket.data.userId;
 
   if (userId) {
     if (!userSocketMap[userId]) {
@@ -84,9 +125,8 @@ io.on("connection", async (socket) => {
 
   try {
     if (userId) {
+      await joinUserConversationRooms(socket, userId);
       await emitPresenceUpdates(userId);
-    } else {
-      socket.emit("getOnlineUsers", getOnlineUserIds());
     }
   } catch (error) {
     console.log("Error while sending online users:", error);

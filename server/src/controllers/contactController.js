@@ -136,7 +136,7 @@ const getConnections = asyncHandler(async (req, res) => {
       .lean();
     const contactInfo = connections.map((connection) => {
       const otherParticipants = connection.participants.filter(
-        (participant) => participant._id.toString() !== userId.toString(),
+        (participant) => participant.user?._id?.toString() !== userId.toString(),
       );
       return {
         _id: connection._id,

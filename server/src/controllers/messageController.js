@@ -3,7 +3,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import cloudinary from "../utils/cloudinary.js";
-
+import { io } from "../utils/socket.js";
 const getCloudinaryPublicIdFromUrl = (url) => {
   if (!url) {
     return null;
@@ -50,7 +50,7 @@ const sendMessage = asyncHandler(async (req, res) => {
       conversationId,
       content: imageURL ? imageURL : trimmedContent,
     });
-
+    io.to(conversationId.toString()).emit("newMessage", newMessage);
     return res
       .status(201)
       .json(new ApiResponse(201, newMessage, "Message sent"));
@@ -87,6 +87,11 @@ const deleteMessage = asyncHandler(async (req, res) => {
     if (!deletedMessage) {
       throw new ApiError(404, "Message doesnot exist or already deleted.");
     }
+
+    io.to(message.conversationId.toString()).emit("messageDeleted", {
+      messageId: deletedMessage._id.toString(),
+      conversationId: message.conversationId.toString(),
+    });
 
     return res.status(200).json(new ApiResponse(200, {}, "Message Deleted"));
   } catch (error) {
@@ -127,6 +132,8 @@ const editMessage = asyncHandler(async (req, res) => {
 
     message.content = content.trim();
     await message.save();
+
+    io.to(message.conversationId.toString()).emit("messageUpdated", message);
 
     return res
       .status(200)
