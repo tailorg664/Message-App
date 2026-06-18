@@ -101,9 +101,12 @@ const ChatHeader = () => {
             aria-label="Close chat info"
             role="button"
             tabIndex={0}
-            className="modal-backdrop"
+            className="modal-backdrop focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
             onClick={() => setShowInfo(false)}
             onKeyDown={(event) => {
+              if (event.key === " ") {
+                event.preventDefault();
+              }
               if (
                 event.key === "Enter" ||
                 event.key === " " ||
