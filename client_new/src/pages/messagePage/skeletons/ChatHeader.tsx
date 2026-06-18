@@ -15,7 +15,8 @@ const ChatHeader = () => {
 
   const memberCount =
     selectedUser.connectionType === "group"
-      ? selectedUser.participantIds.length + (authUser ? 1 : 0)
+      ? selectedUser.participantIds.length +
+        (authUser && !selectedUser.participantIds.includes(authUser._id) ? 1 : 0)
       : null;
 
   return (
@@ -103,7 +104,11 @@ const ChatHeader = () => {
             className="modal-backdrop"
             onClick={() => setShowInfo(false)}
             onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
+              if (
+                event.key === "Enter" ||
+                event.key === " " ||
+                event.key === "Escape"
+              ) {
                 setShowInfo(false);
               }
             }}
