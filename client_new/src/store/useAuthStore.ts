@@ -16,7 +16,7 @@ interface AuthState {
   checkAuth: () => Promise<void>;
   signup: (data: SignupData) => Promise<void>;
   login: (data: Credentials) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateProfile: (data: { avatar: string }) => Promise<void>;
   connectSocket: () => void;
   disconnectSocket: () => void;
@@ -90,11 +90,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  logout: () => {
-    localStorage.removeItem("token");
-    set({ authUser: null });
-    get().disconnectSocket();
-    toast.success("Logged out successfully");
+  logout: async () => {
+    try {
+      await axiosInstance.post("/auth/logout");
+    } catch (error) {
+      toast.error("Unable to logout from server");
+    } finally {
+      localStorage.removeItem("token");
+      set({ authUser: null });
+      get().disconnectSocket();
+      toast.success("Logged out successfully");
+    }
   },
 
   updateProfile: async (data) => {
