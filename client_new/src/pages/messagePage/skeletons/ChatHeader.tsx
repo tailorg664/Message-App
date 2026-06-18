@@ -1,5 +1,5 @@
 import { Info, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { useChatStore } from "../../../store/useChatStore";
 
@@ -13,13 +13,10 @@ const ChatHeader = () => {
     return null;
   }
 
-  const memberCount = useMemo(
-    () =>
-      selectedUser.connectionType === "group"
-        ? selectedUser.participantIds.length + (authUser ? 1 : 0)
-        : null,
-    [authUser, selectedUser.connectionType, selectedUser.participantIds.length],
-  );
+  const memberCount =
+    selectedUser.connectionType === "group"
+      ? selectedUser.participantIds.length + (authUser ? 1 : 0)
+      : null;
 
   return (
     <div className="p-2.5 border-b border-base-300">
@@ -54,7 +51,11 @@ const ChatHeader = () => {
           >
             <Info className="size-5" />
           </button>
-          <button aria-label="Close chat" onClick={() => setSelectedUser(null, null)}>
+          <button
+            aria-label="Close chat"
+            className="btn btn-ghost btn-sm btn-circle"
+            onClick={() => setSelectedUser(null, null)}
+          >
             <X />
           </button>
         </div>
