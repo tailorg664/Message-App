@@ -96,10 +96,17 @@ const ChatHeader = () => {
               </button>
             </div>
           </div>
-          <button
+          <div
             aria-label="Close chat info"
+            role="button"
+            tabIndex={0}
             className="modal-backdrop"
             onClick={() => setShowInfo(false)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                setShowInfo(false);
+              }
+            }}
           />
         </div>
       )}
