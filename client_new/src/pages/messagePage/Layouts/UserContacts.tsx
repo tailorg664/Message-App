@@ -9,6 +9,7 @@ function UserContacts() {
     useChatStore();
   const onlineUsers = useAuthStore((state) => state.onlineUsers);
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const filteredUsers = useMemo(
     () =>
@@ -30,14 +31,36 @@ function UserContacts() {
   }
 
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
+    <aside
+      className={`h-full w-20 border-r border-base-300 flex flex-col transition-all duration-200 ${
+        isCollapsed ? "lg:w-20" : "lg:w-72"
+      }`}
+    >
       <div className="border-b border-base-300 w-full p-5">
-        <div className="flex items-center gap-2">
+        <button
+          type="button"
+          aria-label={isCollapsed ? "Expand contacts" : "Collapse contacts"}
+          aria-expanded={!isCollapsed}
+          className={`flex w-full items-center gap-2 rounded-md transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${
+            isCollapsed ? "lg:justify-center" : ""
+          }`}
+          onClick={() => setIsCollapsed((collapsed) => !collapsed)}
+        >
           <Users className="size-6" />
-          <span className="font-medium hidden lg:block">Contacts</span>
-        </div>
+          <span
+            className={`font-medium ${
+              isCollapsed ? "hidden" : "hidden lg:block"
+            }`}
+          >
+            Contacts
+          </span>
+        </button>
 
-        <div className="mt-3 hidden lg:flex item-center gap-2">
+        <div
+          className={`mt-3 item-center gap-2 ${
+            isCollapsed ? "hidden" : "hidden lg:flex"
+          }`}
+        >
           <label className="cursor-pointer flex items-center gap-2">
             <input
               type="checkbox"
@@ -64,7 +87,7 @@ function UserContacts() {
                 : ""
             }`}
           >
-            <div className="relative mx-auto lg:mx-0">
+            <div className={`relative mx-auto ${isCollapsed ? "" : "lg:mx-0"}`}>
               <img
                 src={user.avatar || "/avatar.png"}
                 alt={user.fullname}
@@ -75,7 +98,11 @@ function UserContacts() {
               )}
             </div>
 
-            <div className="hidden lg:block text-left min-w-0">
+            <div
+              className={`text-left min-w-0 ${
+                isCollapsed ? "hidden" : "hidden lg:block"
+              }`}
+            >
               <div className="font-medium truncate">{user.fullname}</div>
               <div className="text-sm text-zinc-400">
                 {user.connectionType === "group"
@@ -89,7 +116,11 @@ function UserContacts() {
         ))}
 
         {filteredUsers.length === 0 && (
-          <div className="text-center text-zinc-500 py-4">
+          <div
+            className={`text-center text-zinc-500 py-4 ${
+              isCollapsed ? "hidden" : ""
+            }`}
+          >
             {showOnlineOnly ? "No online users" : "No conversations yet"}
           </div>
         )}

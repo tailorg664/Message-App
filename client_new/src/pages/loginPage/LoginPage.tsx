@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Eye, EyeOff, Loader2, Lock, MessageSquare, User } from "lucide-react";
 import AuthImagePattern from "../../components/AuthImagePattern";
@@ -8,6 +8,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoggingIn } = useAuthStore();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -108,7 +109,7 @@ function LoginPage() {
 
             <div>
               Dont have an account?{" "}
-              <Link to="/signup" className="text-primary">
+              <Link to="/signup" state={location.state} className="text-primary">
                 Sign up
               </Link>
             </div>

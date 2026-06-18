@@ -1,5 +1,6 @@
 import type {
   ContactConnection,
+  ConversationParticipant,
   ConversationListItem,
   Participant,
   User,
@@ -30,6 +31,33 @@ function normalizeParticipant(participant: Participant): User | null {
   return null;
 }
 
+function getParticipantId(participant: Participant) {
+  if (participant.user && typeof participant.user === "object") {
+    return participant.user._id;
+  }
+
+  if (typeof participant.user === "string") {
+    return participant.user;
+  }
+
+  return participant._id;
+}
+
+function getConversationParticipant(
+  participant: Participant,
+): ConversationParticipant | null {
+  const user = normalizeParticipant(participant);
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    ...user,
+    role: participant.role || "member",
+  };
+}
+
 export function getOtherParticipant(
   connection: ContactConnection,
   authUserId: string,
@@ -55,14 +83,13 @@ export function getConversationListItem(
 ): ConversationListItem | null {
   if (connection.connectionType === "group") {
     const participantIds = connection.participants
-      .map((participant) => {
-        if (participant.user && typeof participant.user === "object") {
-          return participant.user._id;
-        }
-
-        return participant._id;
-      })
+      .map(getParticipantId)
       .filter((participantId): participantId is string => Boolean(participantId));
+    const participants = connection.participants
+      .map(getConversationParticipant)
+      .filter(
+        (participant): participant is ConversationParticipant => Boolean(participant),
+      );
 
     return {
       _id: connection._id,
@@ -71,7 +98,9 @@ export function getConversationListItem(
       fullname: connection.groupMetadata?.name || "Unnamed group",
       avatar: connection.groupMetadata?.icon || undefined,
       participantIds,
+      participants,
       description: connection.groupMetadata?.description || null,
+      settings: connection.groupMetadata?.settings,
     };
   }
 

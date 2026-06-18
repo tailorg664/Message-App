@@ -16,8 +16,11 @@ router
   .route("/display-friend-connections")
   .get(verifyJwt, contactController.getConnections);
 router
-  .route("/delete-friend")
+  .route("/delete-friend/:contactId")
   .delete(verifyJwt, contactController.deleteContact);
+router
+  .route("/group-access/:groupId")
+  .put(verifyJwt, requireGroup, contactController.adminAccessControl);
 router
   .route("/update-group-metadata/:groupId")
   .put(

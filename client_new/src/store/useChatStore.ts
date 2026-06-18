@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import axios from "axios";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
@@ -22,6 +23,12 @@ interface ChatState {
   getMessages: (conversationId: string) => Promise<void>;
   sendMessage: (messageData: { content: string; image: string | null }) => Promise<void>;
   addFriendByEmail: (email: string) => Promise<boolean>;
+  deleteChat: (conversationId: string) => Promise<boolean>;
+  leaveGroup: (groupId: string) => Promise<boolean>;
+  updateGroupAccess: (
+    groupId: string,
+    access: { editAccess: boolean; inviteAccess: boolean },
+  ) => Promise<boolean>;
   subscribeToMessages: () => void;
   unsubscribeFromMessages: () => void;
   setSelectedUser: (
@@ -54,7 +61,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
         .map((connection) => getConversationListItem(connection, authUser._id))
         .filter((user): user is ConversationListItem => Boolean(user));
 
-      set({ users });
+      const selectedUser = get().selectedUser;
+      set({
+        users,
+        selectedUser: selectedUser
+          ? users.find((user) => user._conversationId === selectedUser._conversationId) ||
+            selectedUser
+          : null,
+      });
     } catch (error) {
       toast.error("Unable to load contacts");
     } finally {
@@ -94,13 +108,77 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   addFriendByEmail: async (email) => {
+    const friendEmail = email.trim();
+    if (!friendEmail) {
+      toast.error("Invalid invite link");
+      return false;
+    }
+
     try {
-      await axiosInstance.post("/contacts/add-friend", { email });
+      await axiosInstance.post("/contacts/add-friend", { email: friendEmail });
       toast.success("Contact added");
       await get().getUsers();
       return true;
     } catch (error) {
-      toast.error("Unable to add contact");
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Unable to add contact"
+        : "Unable to add contact";
+      toast.error(message);
+      return false;
+    }
+  },
+
+  deleteChat: async (conversationId) => {
+    try {
+      await axiosInstance.delete(`/contacts/delete-friend/${conversationId}`);
+      toast.success("Chat deleted");
+      set({
+        users: get().users.filter((user) => user._conversationId !== conversationId),
+        messages: [],
+        selectedUser: null,
+        selectedConversationId: null,
+      });
+      return true;
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Unable to delete chat"
+        : "Unable to delete chat";
+      toast.error(message);
+      return false;
+    }
+  },
+
+  leaveGroup: async (groupId) => {
+    try {
+      await axiosInstance.delete(`/contacts/exit-group/${groupId}`);
+      toast.success("Left group");
+      set({
+        users: get().users.filter((user) => user._conversationId !== groupId),
+        messages: [],
+        selectedUser: null,
+        selectedConversationId: null,
+      });
+      return true;
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Unable to leave group"
+        : "Unable to leave group";
+      toast.error(message);
+      return false;
+    }
+  },
+
+  updateGroupAccess: async (groupId, access) => {
+    try {
+      await axiosInstance.put(`/contacts/group-access/${groupId}`, access);
+      toast.success("Group access updated");
+      await get().getUsers();
+      return true;
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Unable to update group access"
+        : "Unable to update group access";
+      toast.error(message);
       return false;
     }
   },

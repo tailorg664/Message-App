@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 import "./App.css";
@@ -9,9 +9,29 @@ import { LandingPage, LoginPage, Message, Profile, SignupPage, Themes } from "./
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
 
+type RedirectState = {
+  from?: {
+    pathname?: string;
+    search?: string;
+  };
+};
+
+function getRedirectPath(state: unknown) {
+  const redirectState = state as RedirectState | null;
+  const pathname = redirectState?.from?.pathname;
+
+  if (!pathname) {
+    return "/";
+  }
+
+  return `${pathname}${redirectState.from?.search || ""}`;
+}
+
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
   const theme = useThemeStore((state) => state.theme);
+  const location = useLocation();
+  const redirectPath = getRedirectPath(location.state);
 
   useEffect(() => {
     void checkAuth();
@@ -31,16 +51,22 @@ function App() {
       <Routes>
         <Route
           path="/invite/:inviteValue"
-          element={authUser ? <InviteHandler /> : <Navigate to="/login" />}
+          element={
+            authUser ? (
+              <InviteHandler />
+            ) : (
+              <Navigate to="/login" state={{ from: location }} replace />
+            )
+          }
         />
-        <Route path="/" element={authUser ? <Message /> : <LandingPage />} />
+        <Route path="/" element={authUser ? <Message /> : <Navigate to="/login" />} />
         <Route
           path="/signup"
-          element={!authUser ? <SignupPage /> : <Navigate to="/" />}
+          element={!authUser ? <SignupPage /> : <Navigate to={redirectPath} replace />}
         />
         <Route
           path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+          element={!authUser ? <LoginPage /> : <Navigate to={redirectPath} replace />}
         />
         <Route
           path="/profile"

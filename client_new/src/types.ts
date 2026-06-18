@@ -28,7 +28,9 @@ export interface ConversationListItem {
   email?: string;
   avatar?: string;
   participantIds: string[];
+  participants?: ConversationParticipant[];
   description?: string | null;
+  settings?: GroupSettings;
 }
 
 export interface AuthPayload {
@@ -48,13 +50,25 @@ export interface GroupMetadata {
   icon?: string | null;
   description?: string | null;
   createdBy?: string | null;
+  settings?: GroupSettings;
+}
+
+export interface GroupSettings {
+  membersCanEditInfo: boolean;
+  membersCanInvite: boolean;
 }
 
 export interface Participant {
   user?: User | string;
   _id?: string;
   fullname?: string;
+  email?: string;
   avatar?: string;
+  role?: "admin" | "member";
+}
+
+export interface ConversationParticipant extends User {
+  role: "admin" | "member";
 }
 
 export interface ContactConnection {

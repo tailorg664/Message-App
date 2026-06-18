@@ -27,7 +27,8 @@ const getCloudinaryPublicIdFromUrl = (url) => {
 const addFriend = asyncHandler(async (req, res) => {
   try {
     const userId = req.user._id;
-    const friend = await User.findOne({ email: req.body.email })
+    const friendEmail = req.body.email?.trim();
+    const friend = await User.findOne({ email: friendEmail })
       .select("_id email")
       .lean();
     if (!userId) {
@@ -69,11 +70,11 @@ const addFriend = asyncHandler(async (req, res) => {
       .status(201)
       .json(new ApiResponse(201, connection, "Contact added"));
   } catch (error) {
-    throw new ApiError({
-      status: error.status,
-      message: error.message,
-      stack: error.stack,
-    });
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    throw new ApiError(500, error.message, [], error.stack);
   }
 });
 // create a friend group with a name, icon and multiple friends, and add authorization
@@ -117,7 +118,11 @@ const createFriendGroup = asyncHandler(async (req, res) => {
       .status(201)
       .json(new ApiResponse(201, createdGroupInstance, "Group created"));
   } catch (error) {
-    throw new ApiError({ message: error.message, stack: error.stack });
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    throw new ApiError(500, error.message, [], error.stack);
   }
 });
 // get all the connections of the user
@@ -132,16 +137,20 @@ const getConnections = asyncHandler(async (req, res) => {
     const connections = await Conversation.find({
       "participants.user": userId,
     })
-      .populate("participants.user", "fullname avatar")
+      .populate("participants.user", "fullname email avatar")
       .lean();
     const contactInfo = connections.map((connection) => {
-      const otherParticipants = connection.participants.filter(
-        (participant) => participant.user?._id?.toString() !== userId.toString(),
-      );
+      const participants =
+        connection.connectionType === "group"
+          ? connection.participants
+          : connection.participants.filter(
+              (participant) =>
+                participant.user?._id?.toString() !== userId.toString(),
+            );
       return {
         _id: connection._id,
         connectionType: connection.connectionType,
-        participants: otherParticipants,
+        participants,
         groupMetadata: connection.groupMetadata,
       };
     });
@@ -150,7 +159,11 @@ const getConnections = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, contactInfo, "Contacts retrieved"));
   } catch (error) {
-    throw new ApiError({ message: error.message, stack: error.stack });
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    throw new ApiError(500, error.message, [], error.stack);
   }
 });
 // delete a contact from the contact list of the user
@@ -168,18 +181,69 @@ const deleteContact = asyncHandler(async (req, res) => {
       throw new ApiError(404, "invalid contact entry");
     }
 
-    const connection = await Conversation.findOneAndDelete({
+    const connection = await Conversation.findOne({
       _id: contactId,
-      participants: userId,
-    }).lean();
+      "participants.user": userId,
+    });
 
     if (!connection) {
       throw new ApiError(404, "Contact not found or already deleted");
     }
 
+    if (connection.connectionType === "group") {
+      const participantIndex = connection.participants.findIndex(
+        (participant) => participant.user.toString() === userId.toString(),
+      );
+
+      if (participantIndex === -1) {
+        throw new ApiError(403, "You are not a participant of this group");
+      }
+
+      const deletingParticipant = connection.participants[participantIndex];
+
+      if (connection.participants.length === 1) {
+        const oldIconPublicId = getCloudinaryPublicIdFromUrl(
+          connection.groupMetadata?.icon,
+        );
+        if (oldIconPublicId) {
+          await cloudinary.uploader.destroy(oldIconPublicId);
+        }
+
+        await Conversation.findByIdAndDelete(contactId);
+        return res.status(200).json(new ApiResponse(200, null, "Chat deleted"));
+      }
+
+      if (deletingParticipant.role === "admin") {
+        const otherAdmins = connection.participants.filter(
+          (participant) =>
+            participant.role === "admin" &&
+            participant.user.toString() !== userId.toString(),
+        );
+
+        if (otherAdmins.length === 0) {
+          const nextMember = connection.participants.find(
+            (participant) => participant.user.toString() !== userId.toString(),
+          );
+
+          if (nextMember) {
+            nextMember.role = "admin";
+          }
+        }
+      }
+
+      connection.participants.splice(participantIndex, 1);
+      await connection.save();
+      return res.status(200).json(new ApiResponse(200, null, "Chat deleted"));
+    }
+
+    await Conversation.findByIdAndDelete(contactId);
     res.status(200).json(new ApiResponse(200, null, "Contact deleted"));
   } catch (error) {
-    throw new ApiError({ message: error.message, stack: error.stack });
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    throw new ApiError(500, error.message, [], error.stack);
   }
 });
 
@@ -206,7 +270,11 @@ const updateGroupMetaData = asyncHandler(async (req, res) => {
     ).lean();
     res.status(200).json(new ApiResponse(200, group, "Group info updated"));
   } catch (error) {
-    throw new ApiError({ message: error.message, stack: error.stack });
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    throw new ApiError(500, error.message, [], error.stack);
   }
 });
 

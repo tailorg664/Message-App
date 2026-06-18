@@ -5,7 +5,7 @@ import { useChatStore } from "../store/useChatStore";
 
 function InviteHandler() {
   const { inviteValue } = useParams<{ inviteValue: string }>();
-  const addFriendByEmail = useChatStore((state) => state.addFriendByEmail);
+  const { addFriendByEmail, getUsers } = useChatStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,16 +16,20 @@ function InviteHandler() {
         return;
       }
 
-      const decodedEmail = decodeURIComponent(inviteValue);
+      const decodedEmail = decodeURIComponent(inviteValue).trim();
       const success = await addFriendByEmail(decodedEmail);
 
       if (success) {
+        await getUsers();
         navigate("/");
+        return;
       }
+
+      navigate("/");
     };
 
     void handleInvitation();
-  }, [addFriendByEmail, inviteValue, navigate]);
+  }, [addFriendByEmail, getUsers, inviteValue, navigate]);
 
   return <div className="pt-24 text-center">Processing invite...</div>;
 }
