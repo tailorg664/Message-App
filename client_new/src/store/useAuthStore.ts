@@ -94,7 +94,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await axiosInstance.post("/auth/logout");
     } catch (error) {
-      toast.error("Unable to logout from server");
+      toast.error("Logout request failed. You will be logged out locally.");
     } finally {
       localStorage.removeItem("token");
       set({ authUser: null });
