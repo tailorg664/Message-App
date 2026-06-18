@@ -4,3 +4,4 @@ server/node_modules
 # .env
 server/config.env
 client/.env
+client_new/.env
