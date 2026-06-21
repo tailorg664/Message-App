@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/react";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import InviteHandler from "./components/InviteHandler";
@@ -75,6 +76,7 @@ function App() {
         <Route path="/themes" element={<Themes />} />
       </Routes>
       <Toaster />
+      <Analytics />
     </div>
   );
 }
