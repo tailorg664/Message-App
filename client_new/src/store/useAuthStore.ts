@@ -4,7 +4,7 @@ import { io, type Socket } from "socket.io-client";
 import { axiosInstance } from "../lib/axios";
 import type { ApiResponse, AuthPayload, Credentials, SignupData, User } from "../types";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 interface AuthState {
   authUser: User | null;
   isSigningUp: boolean;
@@ -40,7 +40,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     try {
-      const res = await axiosInstance.get<User>("/auth/check");
+      const res = await axiosInstance.get<User>("api/auth/check");
       set({ authUser: res.data });
       if (!get().socket) {
         get().connectSocket();
@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post<ApiResponse<AuthPayload>>(
-        "/auth/signup",
+        "api/auth/signup",
         data,
       );
       localStorage.setItem("token", res.data.data.token);
@@ -76,7 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoggingIn: true });
     try {
       const res = await axiosInstance.post<ApiResponse<AuthPayload>>(
-        "/auth/login",
+        "api/auth/login",
         data,
       );
       localStorage.setItem("token", res.data.data.token);
@@ -92,7 +92,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      await axiosInstance.post("/auth/logout");
+      await axiosInstance.post("api/auth/logout");
     } catch (error) {
       toast.error("Logout request failed. You will be logged out locally.");
     } finally {
@@ -106,7 +106,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   updateProfile: async (data) => {
     set({ updatingProfile: true });
     try {
-      const res = await axiosInstance.put<User>("/auth/update-profile", data);
+      const res = await axiosInstance.put<User>("api/auth/update-profile", data);
       set({ authUser: res.data });
       toast.success("Profile updated successfully");
     } catch (error) {

@@ -55,7 +55,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ isUsersLoading: true });
     try {
       const res = await axiosInstance.get<ApiResponse<ContactConnection[]>>(
-        "/contacts/display-friend-connections",
+        "api/contacts/display-friend-connections",
       );
       const users = res.data.data
         .map((connection) => getConversationListItem(connection, authUser._id))
@@ -80,7 +80,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ isMessagesLoading: true });
     try {
       const res = await axiosInstance.get<ApiResponse<Message[]>>(
-        `/messages/get-messages/${conversationId}`,
+        `api/messages/get-messages/${conversationId}`,
       );
       set({ messages: res.data.data });
     } catch (error) {
@@ -98,7 +98,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     try {
       const res = await axiosInstance.post<ApiResponse<Message>>(
-        `/messages/send-message/${selectedConversationId}`,
+        `api/messages/send-message/${selectedConversationId}`,
         messageData,
       );
       set({ messages: [...messages, res.data.data] });
@@ -115,7 +115,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
 
     try {
-      await axiosInstance.post("/contacts/add-friend", { email: friendEmail });
+      await axiosInstance.post("api/contacts/add-friend", { email: friendEmail });
       toast.success("Contact added");
       await get().getUsers();
       return true;
@@ -130,7 +130,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   deleteChat: async (conversationId) => {
     try {
-      await axiosInstance.delete(`/contacts/delete-friend/${conversationId}`);
+      await axiosInstance.delete(`api/contacts/delete-friend/${conversationId}`);
       toast.success("Chat deleted");
       set({
         users: get().users.filter((user) => user._conversationId !== conversationId),
@@ -150,7 +150,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   leaveGroup: async (groupId) => {
     try {
-      await axiosInstance.delete(`/contacts/exit-group/${groupId}`);
+      await axiosInstance.delete(`api/contacts/exit-group/${groupId}`);
       toast.success("Left group");
       set({
         users: get().users.filter((user) => user._conversationId !== groupId),
@@ -170,7 +170,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   updateGroupAccess: async (groupId, access) => {
     try {
-      await axiosInstance.put(`/contacts/group-access/${groupId}`, access);
+      await axiosInstance.put(`api/contacts/group-access/${groupId}`, access);
       toast.success("Group access updated");
       await get().getUsers();
       return true;
