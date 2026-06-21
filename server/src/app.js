@@ -33,7 +33,8 @@ app.use("/api/contacts/", contactRouter);
 app.use("/api/messages/", messageRouter);
 
 server.listen(process.env.PORT, () => {
-  console.log(`Server is running on http://localhost:${process.env.PORT}`);
   console.log("LOCAL:", localClientURL);
   console.log("MAIN:", mainClientURL);
+  console.log(`Server is running on http://localhost:${process.env.PORT}`);
+  
 });
