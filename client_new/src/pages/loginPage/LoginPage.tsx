@@ -108,7 +108,7 @@ function LoginPage() {
             </div>
 
             <div>
-              Dont have an account?{" "}
+              Don't have an account?{" "}
               <Link to="/signup" state={location.state} className="text-primary">
                 Sign up
               </Link>

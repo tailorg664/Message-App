@@ -23,7 +23,7 @@ const localClientURL = process.env.CLIENT_URL_LOCAL || "http://localhost:5173";
 const mainClientURL = process.env.CLIENT_URL_MAIN;
 const corsOptions = {
   origin: [localClientURL, mainClientURL],
-  methods: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
 };
 
